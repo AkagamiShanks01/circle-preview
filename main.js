@@ -83,9 +83,9 @@
     const total = (portrait || small) ? 609 : 914;
     return {
       portrait, small,
-      dir: portrait ? "seqp4" : (small ? "seqm4" : "seq4"),
+      dir: portrait ? "seqp5" : (small ? "seqm4" : "seq4"),
       total,
-      end: Math.round(0.9237 * (total - 1)),
+      end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
       window: (portrait || small) ? 14 : 40,
       coarseStep: (portrait || small) ? 24 : 16,
       coarseWidth: (portrait || small) ? 540 : 1024,  // Coarse klein dekodieren (Byte-Fix)
