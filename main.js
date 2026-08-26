@@ -83,7 +83,7 @@
     const total = (portrait || small) ? 609 : 914;
     return {
       portrait, small,
-      dir: portrait ? "seqp5" : (small ? "seqm4" : "seq4"),
+      dir: portrait ? "seqp4" : (small ? "seqm4" : "seq4"),
       total,
       end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
       window: (portrait || small) ? 14 : 40,

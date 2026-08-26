@@ -32,7 +32,7 @@ em.red { color: var(--red-soft); }
   background: var(--black) url("seq4/f0001.webp") center / cover no-repeat;
 }
 @media (orientation: portrait) {
-  #film { background-image: url("seqp5/f0001.webp"); }
+  #film { background-image: url("seqp4/f0001.webp"); }
 }
 
 /* EIN durchgehender Lese-Scrim: volle Hoehe, langer Feather, keine Kanten */
