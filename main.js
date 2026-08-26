@@ -43,18 +43,39 @@
       reads.push([pn, pn.section.getBoundingClientRect()]);
     }
     const lastSection = pins[pins.length - 1].section;
+    let maxO = 0;
     for (const [pn, r] of reads) {
       const span = Math.max(1, r.height - innerHeight);
       const p = Math.min(1, Math.max(0, -r.top / span));
       const inF = r.top > 0 ? ease(1 - r.top / (innerHeight * 0.55)) : 1;
       const outF = pn.section === lastSection ? 1 : 1 - ease((p - 0.84) / 0.10);
       const o = Math.min(inF, outF);
+      if (o > maxO) maxO = o;
       pn.el.style.opacity = o.toFixed(3);
       pn.el.style.transform = o > 0.02 ? `translateY(${((1 - inF) * 4).toFixed(2)}vh)` : "translateY(4vh)";
     }
+    copyVisible = maxO;
   }
 
   const pbar = document.getElementById("pbar");
+  const chapterEl = document.getElementById("chapter");
+  const fcountEl = document.getElementById("fcount");
+  const CHAPTERS = [
+    [0.00, "I · THE SIGNAL"],
+    [0.17, "II · THE PASSAGE"],
+    [0.35, "III · THE FORGING"],
+    [0.53, "IV · THE DOCTRINE"],
+    [0.73, "V · THE FIRM"],
+  ];
+  let copyVisible = 1;
+  function updateChapter(p) {
+    if (!chapterEl) return;
+    let label = CHAPTERS[0][1];
+    for (const [s, l] of CHAPTERS) { if (p >= s) label = l; }
+    if (chapterEl.textContent !== label) chapterEl.textContent = label;
+    // nur in den reinen Film-Momenten sichtbar (keine Copy im Bild)
+    chapterEl.classList.toggle("on", copyVisible < 0.12);
+  }
   function progress() {
     const max = document.documentElement.scrollHeight - innerHeight;
     return max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
@@ -85,6 +106,7 @@
       portrait, small,
       dir: portrait ? "seqp4" : (small ? "seqm4" : "seq4"),
       total,
+      start: portrait ? 14 : 0,  // Mobil startet der Film mit sichtbarem Ring statt Void
       end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
       window: (portrait || small) ? 14 : 40,
       coarseStep: (portrait || small) ? 24 : 16,
@@ -412,8 +434,8 @@
   }
   function raf() {
     const p = progress();
-    targetFrame = Math.round(p * C.end);
-    const target = p * C.end;
+    const target = C.start + p * (C.end - C.start);
+    targetFrame = Math.round(target);
     const settled = Math.abs(target - current) <= 0.002;
     if (!settled) {
       current += (target - current) * 0.16;
@@ -422,6 +444,8 @@
       dirty = true;
     }
     choreograph();
+    updateChapter(p);
+    if (fcountEl) fcountEl.textContent = `F ${pad(Math.round(current) + 1)} / ${pad(C.total)}`;
     pbar.style.transform = `scaleX(${p})`;
     if (dirty) { render(); dirty = false; }
     if (settled && !dirty) { rafActive = false; return; }

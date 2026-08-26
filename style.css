@@ -2,7 +2,7 @@
   --red: #e10600;
   --red-soft: #ff2a23;
   --paper: #f4f2ee;
-  --mute: rgba(244, 242, 238, 0.72);
+  --mute: rgba(244, 242, 238, 0.8);
   --black: #050505;
   --navh: calc(88px + env(safe-area-inset-top, 0px));
 }
@@ -73,6 +73,7 @@ em.red { color: var(--red-soft); }
 #pillar-ven  { height: 160vh; }
 #firm        { height: 180vh; }
 #close       { height: 170vh; }
+#still       { height: 130vh; }
 
 .pin {
   position: sticky; top: 0;
@@ -109,12 +110,32 @@ em.red { color: var(--red-soft); }
 .textlink { color: var(--paper); text-decoration: none; border-bottom: 1px solid var(--red); padding-bottom: 1px; margin-left: 0.6em; white-space: nowrap; }
 .textlink:hover { color: var(--red-soft); }
 
+/* still (Aha-Moment) */
+.still-line { font-size: clamp(1.9rem, 4vw, 3.4rem); font-weight: 400; letter-spacing: -0.01em; }
+
+/* Nav-Contact + Kapitel-Marker + Marginalie (zweite Design-Ebene) */
+.nav-contact { margin-left: auto; color: var(--mute); text-decoration: none; font-size: 0.62rem; letter-spacing: 0.35em; font-weight: 500; }
+.nav-contact:hover { color: var(--red-soft); }
+.chapter {
+  position: fixed; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+  z-index: 5; pointer-events: none;
+  font-size: 0.6rem; letter-spacing: 0.45em; color: rgba(244,242,238,0.42);
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.chapter.on { opacity: 1; }
+.marginalia {
+  position: fixed; right: 1.1rem; bottom: 50%; z-index: 5; pointer-events: none;
+  writing-mode: vertical-rl; transform: translateY(50%);
+  font-size: 0.56rem; letter-spacing: 0.4em; color: rgba(244,242,238,0.28);
+  font-variant-numeric: tabular-nums;
+}
+
 /* category */
 .category-line { font-size: clamp(1.7rem, 3.4vw, 3rem); font-weight: 400; letter-spacing: -0.01em; }
 
 /* thesis */
 .thesis { display: flex; flex-direction: column; gap: 0.35em; font-size: clamp(1.8rem, 4.2vw, 3.8rem); font-weight: 500; letter-spacing: -0.02em; line-height: 1.08; }
-.body-copy { margin-top: 1.6rem; max-width: 34em; color: var(--mute); line-height: 1.7; font-size: clamp(0.92rem, 1.15vw, 1.08rem); }
+.body-copy { margin-top: 1.6rem; max-width: 34em; color: var(--mute); line-height: 1.7; font-size: clamp(0.92rem, 1.15vw, 1.08rem); text-shadow: 0 1px 14px rgba(5,5,5,0.9); }
 
 /* pillars */
 .kicker { font-size: 0.65rem; letter-spacing: 0.42em; color: var(--red-soft); margin-bottom: 0.9rem; font-weight: 500; }
@@ -137,10 +158,10 @@ em.red { color: var(--red-soft); }
 .founder p { color: var(--mute); font-size: 0.85rem; line-height: 1.5; max-width: 17em; }
 .f-assad p { margin-inline: auto; }
 
-.intents { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.4rem; }
-.intent { color: var(--mute); font-size: clamp(0.92rem, 1.1vw, 1.05rem); line-height: 1.6; }
-.intent span { color: var(--red-soft); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.3em; margin-right: 0.9em; }
-.contact-note { color: var(--mute); font-size: 0.9rem; margin-top: 1rem; max-width: 38em; line-height: 1.7; }
+.intents { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 0.8rem; }
+.intent { color: var(--paper); font-size: clamp(1.02rem, 1.3vw, 1.2rem); line-height: 1.75; }
+.intent span { color: var(--red-soft); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.32em; margin-right: 1em; }
+.contact-note { color: var(--mute); font-size: 1rem; margin-top: 1.6rem; max-width: 38em; line-height: 1.75; }
 .footer { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1px solid rgba(244,242,238,0.12); font-size: 0.68rem; letter-spacing: 0.18em; color: var(--mute); }
 
 /* ── WORK: schwarze Substanz-Sektion (50k Chess-Rows + Icon-Trio) ── */
@@ -191,12 +212,15 @@ body.js-on .pin { will-change: auto; }
   .shade { background: linear-gradient(to bottom, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0) 30%, rgba(5,5,5,0) 55%, rgba(5,5,5,0.72) 82%, rgba(5,5,5,0.85) 100%); }
   .pin { justify-content: flex-end; padding-bottom: 9vh; }
   .pin.center { justify-content: center; }
+  #hero .pin { justify-content: center; padding-bottom: 14vh; }
+  .nav-contact { display: none; }
+  .marginalia { display: none; }
   .founders { grid-template-columns: 1fr; grid-template-areas: "assad" "nicolas" "alex"; }
   .f-assad, .f-nicolas { text-align: left; justify-self: start; }
   .f-assad p { margin-inline: 0; }
   /* Firm + Close: kein Sticky-Korsett auf kleinen Displays */
   #firm, #close { height: auto; }
-  #firm .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 4vh); padding-bottom: 4rem; justify-content: flex-start; }
+  #firm .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 4vh); padding-bottom: 4rem; justify-content: flex-start; background: rgba(5,5,5,0.86); }
   .footer { flex-direction: column; gap: 0.5rem; }
   .chess-row, .chess-row.reverse { grid-template-columns: 1fr; }
   .chess-row.reverse .chess-video { order: 0; }
