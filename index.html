@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>THE CIRCLE</title>
+  <meta name="description" content="An operator-led education group." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='15' fill='none' stroke='%23e10600' stroke-width='4'/%3E%3C/svg%3E" />
+  <link rel="preload" as="image" href="seq4/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
+  <link rel="preload" as="image" href="seqp4/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="film" aria-hidden="true"></canvas>
+  <div class="shade" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="lockup" href="/">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+      <span>THE&nbsp;CIRCLE</span>
+    </a>
+  </header>
+
+  <div class="progress" aria-hidden="true"><div class="progress-bar" id="pbar"></div></div>
+
+  <main id="scroll-root">
+
+    <!-- 1 · HERO -->
+    <section class="scene" id="hero">
+      <div class="pin">
+        <div class="copy">
+          <h1 class="display">
+            <span>Building people and&nbsp;companies</span>
+            <span>that <em class="red">compound.</em></span>
+          </h1>
+          <p class="sub">We develop people who create and close demand — and we own the system behind&nbsp;it.</p>
+          <div class="ctas">
+            <a class="cta solid" href="#contact">Start a conversation</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · CATEGORY -->
+    <section class="scene" id="category">
+      <div class="pin center">
+        <div class="copy copy-center">
+          <p class="category-line">An <em>operator-led</em> education&nbsp;group.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 · THESIS -->
+    <section class="scene" id="thesis">
+      <div class="pin">
+        <div class="copy">
+          <h2 class="thesis">
+            <span>Built in <em>sales.</em></span>
+            <span>Expanded through <em>education.</em></span>
+            <span>Compounded through <em>ownership.</em></span>
+          </h2>
+          <p class="body-copy">Sales taught the group how demand is created and closed.
+            Education is the business that system now runs. Ownership is the horizon:
+            companies, not a public fund.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4a · EDUCATION -->
+    <section class="scene" id="pillar-edu">
+      <div class="pin">
+        <div class="copy pillar">
+          <p class="kicker">EDUCATION</p>
+          <h2>Education is the <em>present&nbsp;work.</em></h2>
+          <p class="body-copy">The group runs education as a business: demand, conversations,
+            delivery, the data that judges them. The operating system sits here.
+            What a customer buys does not.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4b · VENTURES -->
+    <section class="scene" id="pillar-ven">
+      <div class="pin">
+        <div class="copy pillar">
+          <p class="kicker">VENTURES</p>
+          <h2>Companies, <em>over&nbsp;time.</em></h2>
+          <p class="body-copy">We build companies and partner with founders when the operating
+            system is the advantage. No portfolio. No capital claim. A name appears here
+            only when ownership is documented and the partners want it public.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 · FIRM -->
+    <section class="scene" id="firm">
+      <div class="pin gapped firm-pin">
+        <h2 class="sr-only">The firm</h2>
+        <div class="copy firm-block" id="about">
+          <p class="kicker">THREE OPERATORS. ONE FIRM.</p>
+          <div class="founders">
+            <div class="founder f-assad"><h3>Assad</h3><p>Standards, people, origin.</p></div>
+            <div class="founder f-alex"><h3>Alex Klimkovich</h3><p>Sales, commercial education, delivery.</p></div>
+            <div class="founder f-nicolas"><h3>Nicolas Achiniani</h3><p>Systems, infrastructure, company&nbsp;building.</p></div>
+          </div>
+        </div>
+        <div class="copy firm-block" id="careers">
+          <h2>Operators, <em>not&nbsp;spectators.</em></h2>
+          <p class="body-copy">The work is live accounts, live pipeline, live creative, live judgment
+            inside the house. If you need a title more than a result, this is the wrong house.
+            <a class="textlink" href="mailto:n.achiniani@copy-close.com">Work here</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5b · WORK — schwarze Substanz-Sektion (50k: Chess-Rows + Icon-Trio) -->
+    <section class="solid" id="work">
+      <div class="work-inner">
+        <div class="chess-row">
+          <video class="chess-video" data-src="media/loop-fragments.mp4" muted loop playsinline preload="none"></video>
+          <div class="chess-copy">
+            <p class="kicker">THE SYSTEM</p>
+            <h2 class="work-h">Demand, conversations, <em>delivery.</em></h2>
+            <p class="body-copy">The group runs one operating system across its education
+              business: media, sales, and the data that judges both.</p>
+            <a class="textlink" href="mailto:n.achiniani@copy-close.com">Start a conversation</a>
+          </div>
+        </div>
+        <img class="seam-ring" src="media/divider-ring.webp" width="900" height="864" loading="lazy" decoding="async" alt="" aria-hidden="true" />
+        <div class="chess-row reverse">
+          <video class="chess-video" data-src="media/loop-through.mp4" muted loop playsinline preload="none"></video>
+          <div class="chess-copy">
+            <p class="kicker">THE HORIZON</p>
+            <h2 class="work-h">Ownership, <em>documented.</em></h2>
+            <p class="body-copy">Where the operating system is the advantage, the group builds
+              and partners. No portfolio. No capital claim.</p>
+            <a class="cta solid" href="mailto:n.achiniani@copy-close.com">Work here</a>
+          </div>
+        </div>
+        <div class="feature-trio">
+          <div class="feature">
+            <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <h3>ONE CIRCLE</h3>
+            <p>One firm, one standard, one name behind everything it operates.</p>
+          </div>
+          <div class="feature">
+            <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/></svg>
+            <h3>OPERATOR-LED</h3>
+            <p>Decisions sit with the people who run live accounts and live pipeline.</p>
+          </div>
+          <div class="feature">
+            <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="14" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="26" cy="20" r="9" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/></svg>
+            <h3>COMPOUNDING</h3>
+            <p>People, systems and ownership that stack — nothing rented, nothing borrowed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · CLOSE -->
+    <section class="scene" id="close">
+      <div class="pin gapped firm-pin">
+        <div class="copy firm-block" id="contact">
+          <p class="kicker">WHO THIS IS FOR</p>
+          <div class="intents">
+            <p class="intent"><span>TALENT</span> You want to operate inside the system.</p>
+            <p class="intent"><span>PARTNERS</span> You want to understand the group.</p>
+            <p class="intent"><span>OTHER</span> A precise reason that is not a program.</p>
+          </div>
+          <p class="contact-note">This site is not a catalogue. If you came for a course,
+            you are in the wrong place.
+            <a class="textlink" href="mailto:n.achiniani@copy-close.com">Start a conversation</a></p>
+          <footer class="footer">
+            <span>THE CIRCLE · Operating group</span>
+            <span>Legal via NXT Consult</span>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="main.js"></script>
+</body>
+</html>
