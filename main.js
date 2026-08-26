@@ -76,8 +76,9 @@
   const ctx = canvas.getContext("2d", { alpha: false });
 
   // Orientierungs-abhaengige Konfiguration (Re-Init bei Wechsel)
+  const portraitMQ = matchMedia("(orientation: portrait)");
   function makeConfig() {
-    const portrait = innerHeight > innerWidth;
+    const portrait = portraitMQ.matches;
     const small = Math.min(screen.width, innerWidth) * Math.min(devicePixelRatio || 1, 2) <= 1400;
     const total = (portrait || small) ? 609 : 914;
     return {
@@ -126,11 +127,29 @@
     return blob;
   }
 
+  // iOS-Safari kennt die resizeWidth-Option nicht (TypeError) — Fallback:
+  // voll dekodieren und ueber ein kleines Canvas selbst herunterskalieren.
+  let bitmapOptionsOk = true;
+  async function decodeScaled(blob, targetW) {
+    if (bitmapOptionsOk) {
+      try {
+        return await createImageBitmap(blob, { resizeWidth: targetW, resizeQuality: "medium" });
+      } catch (e) {
+        if (e instanceof TypeError || e.name === "InvalidStateError") bitmapOptionsOk = false;
+        else throw e;
+      }
+    }
+    const full = await createImageBitmap(blob);
+    const h = Math.round(full.height * targetW / full.width);
+    const c = document.createElement("canvas");
+    c.width = targetW; c.height = h;
+    c.getContext("2d").drawImage(full, 0, 0, targetW, h);
+    full.close?.();
+    return c; // Canvas ist drawImage-faehig und hat width/height
+  }
   async function fetchBitmap(i, ctrl, resizeWidth) {
     const blob = await getBlob(i, ctrl.signal);
-    return resizeWidth
-      ? createImageBitmap(blob, { resizeWidth, resizeQuality: "medium" })
-      : createImageBitmap(blob);
+    return resizeWidth ? decodeScaled(blob, resizeWidth) : createImageBitmap(blob);
   }
 
   // Standin-Ebene (nur Desktop): das kleine seqm4-Set (~12MB) als Sofort-Film,
@@ -164,7 +183,7 @@
         const blob = standinBlobs.get(k);
         if (!blob) continue;
         standinPending.add(k);
-        createImageBitmap(blob, { resizeWidth: 1280, resizeQuality: "medium" })
+        decodeScaled(blob, 1280)
           .then((bm) => { standin.set(k, bm); dirty = true; wake(); })
           .catch(() => {})
           .finally(() => standinPending.delete(k));
@@ -335,10 +354,16 @@
     dirty = true;
     pump();
   }
-  addEventListener("resize", () => {
+  function onViewportChange() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => { resize(); classifyPins(); reinitIfOrientationChanged(); wake(); }, 150);
-  });
+  }
+  addEventListener("resize", onViewportChange);
+  portraitMQ.addEventListener?.("change", onViewportChange);
+  visualViewport?.addEventListener("resize", onViewportChange);
+  // In-App-WebViews melden beim Start falsche Groessen — nach dem Settle nachpruefen
+  setTimeout(onViewportChange, 600);
+  setTimeout(onViewportChange, 2000);
 
   function bestAt(i) {
     const f = fine.get(i);
