@@ -317,12 +317,14 @@ body.js-on #hero .ctas { animation: rise var(--dur-3) var(--ease) 0.55s both; }
   padding: 1.15rem 0;
 }
 .marquee-track {
-  display: flex; align-items: center; gap: 3.2rem;
+  display: flex;
   width: max-content;
   animation: marquee 40s linear infinite;
 }
-.marquee-track span { color: var(--mute); white-space: nowrap; }
-.marquee-track i { color: var(--red); font-style: normal; font-size: 0.45rem; }
+/* Zwei identische Gruppen, jede mit Schluss-Abstand → -50%-Loop ist exakt nahtlos */
+.marquee-group { display: flex; align-items: center; gap: 3.2rem; padding-right: 3.2rem; }
+.marquee-group span { font-size: var(--t1); letter-spacing: 0.4em; font-weight: 500; color: var(--mute); white-space: nowrap; }
+.marquee-group i { color: var(--red); font-style: normal; font-size: 0.45rem; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ── Loader ─────────────────────────────── */
