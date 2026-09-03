@@ -256,6 +256,24 @@ body.js-on #hero .ctas { animation: rise var(--dur-3) var(--ease) 0.55s both; }
 .feature h3 { font-size: 0.8rem; letter-spacing: 0.28em; font-weight: 500; margin-bottom: 0.5rem; }
 .feature p { color: var(--mute); font-size: 0.9rem; line-height: 1.65; max-width: 22em; }
 
+/* ── Marquee: endlos laufende Marke-Zeile zwischen WORK und CLOSE ── */
+.marquee {
+  position: relative; z-index: 3;
+  background: var(--black);
+  border-top: 1px solid rgba(244, 242, 238, 0.1);
+  border-bottom: 1px solid rgba(244, 242, 238, 0.1);
+  overflow: hidden;
+  padding: 1.15rem 0;
+}
+.marquee-track {
+  display: flex; align-items: center; gap: 3.2rem;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+.marquee-track span { font-size: 0.68rem; letter-spacing: 0.42em; font-weight: 500; color: var(--mute); white-space: nowrap; }
+.marquee-track i { color: var(--red); font-style: normal; font-size: 0.45rem; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
 /* Choreografie: JS steuert opacity/transform direkt; ohne JS bleibt alles sichtbar.
    will-change nur dort, wo der Pin wirklich animiert (sticky). */
 body.js-on .pin { will-change: auto; }
@@ -296,4 +314,5 @@ body.js-on .pin { will-change: auto; }
 @media (prefers-reduced-motion: reduce) {
   body.js-on .pin { opacity: 1 !important; transform: none !important; }
   #hero .display span, #hero .sub, #hero .ctas { animation: none !important; }
+  .marquee-track { animation: none; }
 }
