@@ -100,8 +100,16 @@
   const portraitMQ = matchMedia("(orientation: portrait)");
   function makeConfig() {
     const portrait = portraitMQ.matches;
-    const small = Math.min(screen.width, innerWidth) * Math.min(devicePixelRatio || 1, 2) <= 1400;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    const small = innerWidth * dpr <= 1024;
     const total = (portrait || small) ? 609 : 914;
+    // Fine-Ebene nur so gross dekodieren, wie das Canvas wirklich zeichnet
+    // (Frames 16:9 bzw. 9:16, cover-geskalattet) — schont Decode/Budget und
+    // eliminiert Eviction-Churn, ohne jemals weicher als nativ zu sein.
+    const vw = Math.round(innerWidth * dpr), vh = Math.round(innerHeight * dpr);
+    const fineWidth = portrait
+      ? Math.max(720, Math.min(1080, Math.ceil(Math.max(vw, vh * 0.5625))))
+      : Math.max(960, Math.min(2560, Math.ceil(Math.max(vw, (vh * 16) / 9))));
     return {
       portrait, small,
       dir: portrait ? "seqp4" : (small ? "seqm4" : "seq4"),
@@ -111,11 +119,12 @@
       window: (portrait || small) ? 14 : 40,
       coarseStep: (portrait || small) ? 24 : 16,
       coarseWidth: (portrait || small) ? 540 : 1024,  // Coarse klein dekodieren (Byte-Fix)
+      fineWidth,
       byteCap: (portrait || small) ? 140e6 : 420e6,   // hartes Dekodier-Byte-Limit
     };
   }
   let C = makeConfig();
-  const MAX_INFLIGHT = 8;
+  const MAX_INFLIGHT = 10;
   const COARSE_MIN = 2;     // echte Mindestparallelitaet der Basis-Ebene
   const MAX_RETRY = 2;
 
@@ -152,10 +161,10 @@
   // iOS-Safari kennt die resizeWidth-Option nicht (TypeError) — Fallback:
   // voll dekodieren und ueber ein kleines Canvas selbst herunterskalieren.
   let bitmapOptionsOk = true;
-  async function decodeScaled(blob, targetW) {
+  async function decodeScaled(blob, targetW, quality) {
     if (bitmapOptionsOk) {
       try {
-        return await createImageBitmap(blob, { resizeWidth: targetW, resizeQuality: "medium" });
+        return await createImageBitmap(blob, { resizeWidth: targetW, resizeQuality: quality || "medium" });
       } catch (e) {
         if (e instanceof TypeError || e.name === "InvalidStateError") bitmapOptionsOk = false;
         else throw e;
@@ -169,9 +178,9 @@
     full.close?.();
     return c; // Canvas ist drawImage-faehig und hat width/height
   }
-  async function fetchBitmap(i, ctrl, resizeWidth) {
+  async function fetchBitmap(i, ctrl, resizeWidth, quality) {
     const blob = await getBlob(i, ctrl.signal);
-    return resizeWidth ? decodeScaled(blob, resizeWidth) : createImageBitmap(blob);
+    return resizeWidth ? decodeScaled(blob, resizeWidth, quality) : createImageBitmap(blob);
   }
 
   // Standin-Ebene (nur Desktop): das kleine seqm4-Set (~12MB) als Sofort-Film,
@@ -205,7 +214,7 @@
         const blob = standinBlobs.get(k);
         if (!blob) continue;
         standinPending.add(k);
-        decodeScaled(blob, 1280)
+        decodeScaled(blob, 1600)
           .then((bm) => { standin.set(k, bm); dirty = true; wake(); })
           .catch(() => {})
           .finally(() => standinPending.delete(k));
@@ -254,7 +263,7 @@
     const myEpoch = epoch;
     pending.set(i, { ctrl, isCoarse });
     isCoarse ? inflightCoarse++ : inflightFine++;
-    fetchBitmap(i, ctrl, isCoarse ? C.coarseWidth : 0)
+    fetchBitmap(i, ctrl, isCoarse ? C.coarseWidth : C.fineWidth, isCoarse ? "medium" : "high")
       .then((bm) => {
         if (myEpoch !== epoch) { bm.close?.(); return; }
         failures.delete(i);
@@ -365,20 +374,29 @@
   }
   resize();
 
-  function reinitIfOrientationChanged() {
+  function reinitIfConfigChanged() {
     const next = makeConfig();
-    if (next.dir === C.dir) return;
-    epoch++;
-    clearAll();
-    C = next;
-    loaderDone = false; loaderStart = performance.now();
-    current = targetFrame = Math.round(progress() * C.end);
+    if (next.dir === C.dir && Math.abs(next.fineWidth - C.fineWidth) <= C.fineWidth * 0.25) return;
+    if (next.dir !== C.dir) {
+      epoch++;
+      clearAll();
+      C = next;
+      loaderDone = false; loaderStart = performance.now();
+      current = targetFrame = Math.round(progress() * C.end);
+    } else {
+      // Nur Aufloesungs-Drift: Bitmaps neu dekodieren, Blob-Cache bleibt warm
+      C.fineWidth = next.fineWidth;
+      for (const [, bm] of fine) bm.close?.();
+      for (const [, bm] of coarse) bm.close?.();
+      fine.clear(); coarse.clear();
+      fineBytes = coarseBytes = 0;
+    }
     dirty = true;
     pump();
   }
   function onViewportChange() {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { resize(); classifyPins(); reinitIfOrientationChanged(); wake(); }, 150);
+    resizeTimer = setTimeout(() => { resize(); classifyPins(); reinitIfConfigChanged(); wake(); }, 150);
   }
   addEventListener("resize", onViewportChange);
   portraitMQ.addEventListener?.("change", onViewportChange);

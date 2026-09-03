@@ -154,7 +154,7 @@ em.red { color: var(--red-soft); }
   max-width: 56em;
 }
 .f-assad   { justify-self: start; }
-.f-nicolas { justify-self: start; }
+.f-nika    { justify-self: start; }
 .f-alex    { justify-self: start; }
 .founder h3 { font-size: clamp(1rem, 1.5vw, 1.3rem); font-weight: 500; margin-bottom: 0.25rem; }
 .founder p { color: var(--mute); font-size: 0.85rem; line-height: 1.5; max-width: 17em; }
@@ -224,8 +224,8 @@ body.js-on .pin { will-change: auto; }
   #hero .pin { justify-content: center; padding-bottom: 14vh; }
   .nav-contact { display: none; }
   .marginalia { display: none; }
-  .founders { grid-template-columns: 1fr; grid-template-areas: "assad" "nicolas" "alex"; }
-  .f-assad, .f-nicolas { text-align: left; justify-self: start; }
+  .founders { grid-template-columns: 1fr; grid-template-areas: "assad" "nika" "alex"; }
+  .f-assad, .f-nika { text-align: left; justify-self: start; }
   .f-assad p { margin-inline: 0; }
   /* Firm + Close: kein Sticky-Korsett auf kleinen Displays */
   #firm, #close { height: auto; }
