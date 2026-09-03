@@ -66,10 +66,13 @@ em.red { color: var(--red-soft); }
 
 /* ── scenes ─────────────────────────────── */
 .scene { position: relative; z-index: 3; }
+/* P1-Fix: Copy-Lesbarkeit auf hellen Film-Frames (Text-Scrim) */
+.pin .copy { text-shadow: 0 1px 2px rgba(5,5,5,0.6), 0 0 26px rgba(5,5,5,0.42); }
 #hero        { height: 200vh; }
 #category    { height: 170vh; }
 #thesis      { height: 190vh; }
-#pillar-edu  { height: 160vh; }
+#pillar-int  { height: 160vh; }
+#pillar-mm   { height: 160vh; }
 #pillar-ven  { height: 160vh; }
 #firm        { height: 180vh; }
 #close       { height: 170vh; }
@@ -146,23 +149,22 @@ em.red { color: var(--red-soft); }
 .firm-pin { padding-top: calc(var(--navh) + 3vh); }
 .founders {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-areas: ". assad ." "alex . nicolas";
+  grid-template-columns: repeat(3, 1fr);
   gap: clamp(0.8rem, 2vh, 1.6rem) clamp(1.2rem, 3vw, 3rem);
   max-width: 56em;
 }
-.f-assad   { grid-area: assad; text-align: center; justify-self: center; }
-.f-nicolas { grid-area: nicolas; text-align: right; justify-self: end; }
-.f-alex    { grid-area: alex; justify-self: start; }
+.f-assad   { justify-self: start; }
+.f-nicolas { justify-self: start; }
+.f-alex    { justify-self: start; }
 .founder h3 { font-size: clamp(1rem, 1.5vw, 1.3rem); font-weight: 500; margin-bottom: 0.25rem; }
 .founder p { color: var(--mute); font-size: 0.85rem; line-height: 1.5; max-width: 17em; }
 .f-assad p { margin-inline: auto; }
 
 .intents { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 0.8rem; }
 .intent { color: var(--paper); font-size: clamp(1.02rem, 1.3vw, 1.2rem); line-height: 1.75; }
-.intent span { color: var(--red-soft); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.32em; margin-right: 1em; }
+.intent span { color: var(--red-soft); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.32em; margin-right: 1em; display: inline-block; min-width: 11ch; }
 .contact-note { color: var(--mute); font-size: 1rem; margin-top: 1.6rem; max-width: 38em; line-height: 1.75; }
-.footer { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1px solid rgba(244,242,238,0.12); font-size: 0.68rem; letter-spacing: 0.18em; color: var(--mute); }
+.footer { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1px solid rgba(244,242,238,0.1); font-size: 0.68rem; letter-spacing: 0.18em; color: var(--mute); }
 
 /* ── WORK: schwarze Substanz-Sektion (50k Chess-Rows + Icon-Trio) ── */
 .solid {
@@ -191,8 +193,15 @@ em.red { color: var(--red-soft); }
   mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 55%, transparent 98%);
 }
 .chess-copy .cta.solid { display: inline-block; margin-top: 1.6rem; }
-.work-h { font-size: clamp(1.3rem, 2.4vw, 2.1rem); font-weight: 500; letter-spacing: 0.02em; }
+.pillar > .textlink, .chess-copy > .textlink, .teams-row > .textlink { margin-left: 0; display: inline-block; margin-top: 0.5rem; }
+.work-h { font-size: clamp(1.3rem, 2.4vw, 2.1rem); font-weight: 500; letter-spacing: -0.015em; }
 .chess-copy .body-copy { margin-top: 0.9rem; }
+.teams-row { text-align: left; padding-top: clamp(1rem, 3vh, 2rem); border-top: 1px solid rgba(244,242,238,0.1); }
+.teams-line { display: flex; flex-wrap: wrap; gap: clamp(1.2rem, 4vw, 3.2rem); margin: 1.1rem 0 1rem; }
+.teams-line span { font-size: clamp(0.95rem, 1.6vw, 1.25rem); letter-spacing: 0.3em; font-weight: 500; color: var(--paper); white-space: nowrap; }
+.teams-line span::before { content: "○ "; color: var(--red); letter-spacing: 0; margin-right: 0.35em; }
+.teams-row .body-copy { max-width: 34em; }
+
 .feature-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.6rem, 4vw, 3.5rem); padding-top: clamp(1rem, 3vh, 2rem); border-top: 1px solid rgba(244,242,238,0.1); }
 .feature svg { width: 2rem; height: 2rem; color: var(--red); margin-bottom: 0.9rem; }
 .feature h3 { font-size: 0.8rem; letter-spacing: 0.28em; font-weight: 500; margin-bottom: 0.5rem; }

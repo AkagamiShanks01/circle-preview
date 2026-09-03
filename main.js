@@ -65,7 +65,7 @@
     [0.17, "II · THE PASSAGE"],
     [0.35, "III · THE FORGING"],
     [0.53, "IV · THE DOCTRINE"],
-    [0.73, "V · THE FIRM"],
+    [0.80, "V · THE FIRM"],
   ];
   let copyVisible = 1;
   function updateChapter(p) {
