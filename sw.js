@@ -1,6 +1,6 @@
 /* THE CIRCLE — Service Worker: Cache-first fuer Film-Frames und Media.
  * Erster Besuch fuellt den Cache, jeder weitere laedt ohne Netz — sofort. */
-const CACHE = "circle-film-v3";
+const CACHE = "circle-film-v4";
 const ASSET = /\/(seq4|seqp4|seqm4|media)\//;
 
 self.addEventListener("install", (e) => self.skipWaiting());
