@@ -352,12 +352,14 @@
     if (!el) {
       el = document.createElement("div");
       el.id = "loader";
-      el.style.cssText = "position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);z-index:50;font-size:0.6rem;letter-spacing:0.35em;color:rgba(244,242,238,0.5);font-family:Inter,sans-serif";
+      el.innerHTML = '<span class="loader-label"></span><span class="bar"></span>';
       document.body.appendChild(el);
     }
     const pct = Math.min(99, Math.round((have / phase1Total) * 100));
     const slow = performance.now() - loaderStart > 30000;
-    el.textContent = (slow ? "SLOW CONNECTION — " : "") + "LOADING FILM " + pct + "%";
+    el.querySelector(".loader-label").textContent =
+      (slow ? "SLOW CONNECTION — " : "") + "LOADING FILM " + pct + "%";
+    el.style.setProperty("--p", (pct / 100).toFixed(3));
   }
 
   // ── Canvas ───────────────────────────────
