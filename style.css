@@ -1,12 +1,32 @@
+/* THE CIRCLE — Design-System
+ * Ein System, keine Freigrade: 6 Typo-Tieres, eine Raumskala,
+ * ein Letter-Spacing-Set, eine Ease-Familie. Alles darunter ist Token.
+ */
 :root {
+  /* Farben */
   --red: #e10600;
   --red-soft: #ff2a23;
   --paper: #f4f2ee;
   --mute: rgba(244, 242, 238, 0.8);
+  --faint: rgba(244, 242, 238, 0.35);
+  --hairline: rgba(244, 242, 238, 0.1);
   --black: #050505;
   --navh: calc(88px + env(safe-area-inset-top, 0px));
-  /* Craft-Tokens: eine Skala fuer Raum, Zeit und Bewegung */
-  --s1: 0.8rem; --s2: 1.6rem; --s3: 2.4rem; --s4: 3.2rem; --s5: 4.8rem;
+
+  /* Raumskala */
+  --s0: 0.5rem; --s1: 1rem; --s2: 1.5rem; --s3: 2.5rem; --s4: 4rem; --s5: 6rem;
+
+  /* Typo-Tieres (Groesse) — Tier 0 bis 5 */
+  --t0: 0.6rem;                                   /* Micro: Nav-Klein, Kapitel, Footer */
+  --t1: 0.7rem;                                   /* Label: Kicker, Indizes, Marquee */
+  --t2: 0.75rem;                                  /* Small-Label: Feature-Titel, Intent-Tags */
+  --t3: clamp(0.95rem, 1.15vw, 1.06rem);          /* Body */
+  --t4: clamp(1rem, 1.5vw, 1.2rem);               /* Tag-Zeile (Teams), Intent-Zeilen */
+  --t5h: clamp(1.6rem, 3vw, 2.8rem);              /* H2: Pillars, Firm, Work */
+  --t5s: clamp(1.9rem, 4vw, 4rem);                /* Scene-Line: Category, Thesis, Still */
+  --t5d: clamp(2.7rem, 7vw, 7rem);                /* Display: nur Hero */
+
+  /* Zeit */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --dur-1: 0.25s; --dur-2: 0.6s; --dur-3: 1s;
 }
@@ -18,16 +38,11 @@ body {
   color: var(--paper);
   font-family: "Inter", system-ui, sans-serif;
   font-weight: 300;
+  font-feature-settings: "kern" 1, "liga" 1;
   overflow-x: hidden;
 }
 
-/* Serif-Akzent: Papier ueberall, Rot nur im Hero */
-em { font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400; color: var(--paper); white-space: nowrap; }
-em.red { color: var(--red-soft); }
-
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-
-/* Interaktions-Zustaende: Selection, Scrollbar, Focus — designt, nicht default */
+/* Interaktions-Zustaende: Selection, Scrollbar, Focus */
 ::selection { background: var(--red); color: var(--paper); }
 html { scrollbar-width: thin; scrollbar-color: rgba(244, 242, 238, 0.22) transparent; }
 ::-webkit-scrollbar { width: 8px; }
@@ -35,8 +50,36 @@ html { scrollbar-width: thin; scrollbar-color: rgba(244, 242, 238, 0.22) transpa
 ::-webkit-scrollbar-track { background: transparent; }
 :focus-visible { outline: 1px solid var(--red-soft); outline-offset: 4px; }
 
-/* CSS-Poster: erster Frame sichtbar, bevor JS laeuft — und Degradationspfad,
-   falls die Frame-Engine ausfaellt */
+/* Serif-Akzent: Papier ueberall, Rot nur im Hero */
+em { font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400; color: var(--paper); white-space: nowrap; }
+em.red { color: var(--red-soft); }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ── Typo-Tieres als Klassen ─────────────── */
+/* T0 Micro: 0.6rem / 0.35em / 500 */
+.nav-contact, .chapter, .marginalia, .footer,
+#loader { font-size: var(--t0); letter-spacing: 0.35em; font-weight: 500; }
+
+/* T1 Label: 0.7rem / 0.4em / 500 */
+.kicker, .f-idx, .proof-frame span, .marquee-track span,
+.lockup { font-size: var(--t1); letter-spacing: 0.4em; font-weight: 500; }
+
+/* T2 Small-Label: 0.75rem / 0.3em / 500 */
+.feature h3, .intent span { font-size: var(--t2); letter-spacing: 0.3em; font-weight: 500; }
+
+/* T3 Body: 1.06rem / 1.7 */
+.sub, .body-copy, .contact-note, .proof-slot figcaption {
+  font-size: var(--t3); line-height: 1.7; color: var(--mute);
+}
+
+/* T5 Scene-Line: 4.8rem / 1.05 / 500 / -0.02em */
+.category-line, .thesis, .still-line {
+  font-size: var(--t5s); line-height: 1.05; font-weight: 500;
+  letter-spacing: -0.02em; text-wrap: balance;
+}
+
+/* CSS-Poster: erster Frame sichtbar, bevor JS laeuft — und Degradationspfad */
 #film {
   position: fixed; inset: 0;
   width: 100vw; height: 100vh; height: 100svh;
@@ -47,7 +90,7 @@ html { scrollbar-width: thin; scrollbar-color: rgba(244, 242, 238, 0.22) transpa
   #film { background-image: url("seqp4/f0001.webp"); }
 }
 
-/* EIN durchgehender Lese-Scrim: volle Hoehe, langer Feather, keine Kanten */
+/* EIN durchgehender Lese-Scrim */
 .shade {
   position: fixed; inset: 0;
   z-index: 1; pointer-events: none;
@@ -70,15 +113,35 @@ html { scrollbar-width: thin; scrollbar-color: rgba(244, 242, 238, 0.22) transpa
   pointer-events: none;
 }
 .nav a { pointer-events: auto; }
-.lockup { display: flex; align-items: center; gap: 0.7rem; color: var(--paper); text-decoration: none; letter-spacing: 0.22em; font-weight: 500; font-size: 0.8rem; }
+.lockup { display: flex; align-items: center; gap: 0.7rem; color: var(--paper); text-decoration: none; }
 .lockup svg { width: 1.35rem; height: 1.35rem; color: var(--red); }
+
+.nav-contact {
+  margin-left: auto; color: var(--mute); text-decoration: none;
+  border: 1px solid rgba(244, 242, 238, 0.2); border-radius: 999px;
+  padding: 0.9em 1.55em 0.9em 2em;
+  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
+}
+.nav-contact:hover { color: var(--paper); }
 
 .progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 41; }
 .progress-bar { height: 100%; width: 100%; background: var(--red); transform: scaleX(0); transform-origin: left; }
 
+.chapter {
+  position: fixed; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+  z-index: 5; pointer-events: none;
+  color: var(--faint);
+  opacity: 0; transition: opacity var(--dur-2) var(--ease);
+}
+.chapter.on { opacity: 1; }
+.marginalia {
+  position: fixed; right: 1.1rem; bottom: 50%; z-index: 5; pointer-events: none;
+  writing-mode: vertical-rl; transform: translateY(50%);
+  color: var(--faint); font-variant-numeric: tabular-nums;
+}
+
 /* ── scenes ─────────────────────────────── */
 .scene { position: relative; z-index: 3; }
-/* P1-Fix: Copy-Lesbarkeit auf hellen Film-Frames (Text-Scrim) */
 .pin .copy { text-shadow: 0 1px 2px rgba(5,5,5,0.6), 0 0 26px rgba(5,5,5,0.42); }
 #hero        { height: 200vh; }
 #category    { height: 170vh; }
@@ -97,11 +160,12 @@ html { scrollbar-width: thin; scrollbar-color: rgba(244, 242, 238, 0.22) transpa
   padding: var(--navh) clamp(1.5rem, 6vw, 7rem) 2rem;
 }
 .pin.center { align-items: center; text-align: center; }
-.pin.gapped { gap: clamp(1.4rem, 4vh, 3rem); }
+.pin.gapped { gap: var(--s3); }
 
 .copy { position: relative; max-width: 40em; }
-/* Nur die zentrierte Zeile braucht eigene Abdunklung — weit ausgefeathert, Kante unsichtbar */
-.copy-center { padding: clamp(2rem, 6vw, 4rem); }
+.copy-center { padding: clamp(2rem, 6vw, 4rem); max-width: none; }
+/* Scene-Lines brauchen die volle Breite, nicht das Body-Mass */
+#category .copy, #thesis .copy, #still .copy { max-width: none; }
 .copy-center::before {
   content: "";
   position: absolute; inset: -120% -160%;
@@ -109,8 +173,8 @@ html { scrollbar-width: thin; scrollbar-color: rgba(244, 242, 238, 0.22) transpa
   background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(5,5,5,0.8) 0%, rgba(5,5,5,0.45) 28%, rgba(5,5,5,0) 52%);
 }
 
-/* hero — maximale typografische Spannweite: Display gross, Labels winzig */
-.display { font-size: clamp(2.6rem, 7.2vw, 7.5rem); line-height: 1; font-weight: 500; letter-spacing: -0.03em; text-wrap: balance; }
+/* ── Hero (Display-Tier) ────────────────── */
+.display { font-size: var(--t5d); line-height: 1; font-weight: 500; letter-spacing: -0.03em; text-wrap: balance; }
 .display span { display: block; }
 
 /* Intro-Choreografie: gestaffelter Auftakt beim ersten Paint */
@@ -120,10 +184,11 @@ body.js-on #hero .display span:nth-child(2) { animation-delay: 0.12s; }
 body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 body.js-on #hero .ctas { animation: rise var(--dur-3) var(--ease) 0.55s both; }
 
-.sub { margin-top: var(--s3); max-width: 26em; color: var(--mute); font-size: clamp(0.95rem, 1.25vw, 1.15rem); line-height: 1.7; }
+.sub { margin-top: var(--s3); max-width: 26em; }
 .ctas { margin-top: var(--s4); display: flex; gap: 1.4rem; align-items: center; }
+
 .cta.solid {
-  text-decoration: none; font-size: 0.9rem; letter-spacing: 0.08em; font-weight: 500;
+  text-decoration: none; font-size: 0.85rem; letter-spacing: 0.12em; font-weight: 500;
   padding: 1.05em 2.2em; border-radius: 3px;
   background: var(--paper); color: #0a0a0a;
   box-shadow: 0 0 24px rgba(225, 6, 0, 0.25);
@@ -135,91 +200,68 @@ body.js-on #hero .ctas { animation: rise var(--dur-3) var(--ease) 0.55s both; }
   .nav-contact:hover { color: var(--paper); border-color: rgba(255, 42, 35, 0.55); }
 }
 .cta.solid:active { transform: translateY(0); }
-.textlink { color: var(--paper); text-decoration: none; border-bottom: 1px solid var(--red); padding-bottom: 1px; margin-left: 0.6em; white-space: nowrap; transition: color var(--dur-1) var(--ease); }
-
-/* still (Aha-Moment) */
-.still-line { font-size: clamp(2.2rem, 4.6vw, 4.6rem); font-weight: 400; letter-spacing: -0.015em; text-wrap: balance; }
-
-/* Nav-Contact als Pille + Kapitel-Marker + Marginalie (zweite Design-Ebene) */
-.nav-contact {
-  margin-left: auto; color: var(--mute); text-decoration: none;
-  font-size: 0.62rem; letter-spacing: 0.35em; font-weight: 500;
-  border: 1px solid rgba(244, 242, 238, 0.2); border-radius: 999px;
-  padding: 0.9em 1.55em 0.9em 2em;
-  transition: color var(--dur-1) var(--ease), border-color var(--dur-1) var(--ease);
-}
-.nav-contact:hover { color: var(--paper); }
-.chapter {
-  position: fixed; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
-  z-index: 5; pointer-events: none;
-  font-size: 0.6rem; letter-spacing: 0.45em; color: rgba(244,242,238,0.42);
-  opacity: 0; transition: opacity var(--dur-2) var(--ease);
-}
-.chapter.on { opacity: 1; }
-.marginalia {
-  position: fixed; right: 1.1rem; bottom: 50%; z-index: 5; pointer-events: none;
-  writing-mode: vertical-rl; transform: translateY(50%);
-  font-size: 0.56rem; letter-spacing: 0.4em; color: rgba(244,242,238,0.28);
-  font-variant-numeric: tabular-nums;
+.textlink {
+  color: var(--paper); text-decoration: none; border-bottom: 1px solid var(--red);
+  padding-bottom: 1px; margin-left: 0.6em; white-space: nowrap;
+  transition: color var(--dur-1) var(--ease);
 }
 
-/* Loader: designter Ladezustand (Label + Haarlinie mit Rot-Fortschritt) */
-#loader {
-  position: fixed; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
-  z-index: 50; font-size: 0.6rem; letter-spacing: 0.35em;
-  color: rgba(244, 242, 238, 0.5); font-family: Inter, sans-serif;
-  text-align: center;
+/* ── Pillars / Firm (H2-Tier) ───────────── */
+.kicker { color: var(--red-soft); margin-bottom: var(--s1); display: block; }
+.pillar h2, .firm-block h2, .work-h {
+  font-size: var(--t5h); line-height: 1.15; font-weight: 500;
+  letter-spacing: -0.02em; text-wrap: balance;
 }
-#loader .bar {
-  display: block; width: 128px; height: 1px; margin: 0.9rem auto 0;
-  background: rgba(244, 242, 238, 0.14); position: relative; overflow: hidden;
-}
-#loader .bar::after {
-  content: ""; position: absolute; inset: 0; background: var(--red);
-  transform-origin: left; transform: scaleX(var(--p, 0));
-  transition: transform 0.4s var(--ease);
-}
+.body-copy { margin-top: var(--s2); max-width: 34em; text-shadow: 0 1px 14px rgba(5,5,5,0.9); }
+.pillar .body-copy { margin-top: var(--s2); }
 
-/* category */
-.category-line { font-size: clamp(2rem, 4.6vw, 4.6rem); font-weight: 400; letter-spacing: -0.015em; text-wrap: balance; }
-
-/* thesis */
-.thesis { display: flex; flex-direction: column; gap: 0.3em; font-size: clamp(2.1rem, 5.2vw, 5.2rem); font-weight: 500; letter-spacing: -0.025em; line-height: 1.04; text-wrap: balance; }
-.body-copy { margin-top: 1.6rem; max-width: 34em; color: var(--mute); line-height: 1.7; font-size: clamp(0.92rem, 1.15vw, 1.08rem); text-shadow: 0 1px 14px rgba(5,5,5,0.9); }
-
-/* pillars */
-.kicker { font-size: 0.65rem; letter-spacing: 0.42em; color: var(--red-soft); margin-bottom: 0.9rem; font-weight: 500; }
-.pillar h2, .firm-block h2 { font-size: clamp(1.7rem, 3.2vw, 3rem); font-weight: 500; letter-spacing: -0.02em; text-wrap: balance; }
-.pillar .body-copy { margin-top: 0.9rem; }
-
-/* firm */
+/* ── Firm ───────────────────────────────── */
 .firm-pin { padding-top: calc(var(--navh) + 3vh); }
 .founders {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: clamp(0.8rem, 2vh, 1.6rem) clamp(1.2rem, 3vw, 3rem);
+  gap: var(--s3) clamp(1.5rem, 3vw, 3rem);
   max-width: 56em;
 }
-.f-assad   { justify-self: start; }
-.f-nika    { justify-self: start; }
-.f-alex    { justify-self: start; }
-.founder h3 { font-size: clamp(1rem, 1.5vw, 1.3rem); font-weight: 500; margin-bottom: 0.25rem; }
-.founder p { color: var(--mute); font-size: 0.85rem; line-height: 1.5; max-width: 17em; }
-.f-assad p { margin-inline: auto; }
+.f-assad, .f-nika, .f-alex { justify-self: start; }
+.portrait {
+  aspect-ratio: 3 / 4; max-width: 148px; margin-bottom: var(--s1);
+  border: 1px solid rgba(244, 242, 238, 0.14); background: #0a0a0a;
+  display: flex; align-items: center; justify-content: center;
+}
+.portrait span { font-family: "Instrument Serif", serif; font-style: italic; font-size: 2.1rem; color: var(--faint); }
+.founder h3 { font-size: clamp(1.05rem, 1.4vw, 1.25rem); font-weight: 500; letter-spacing: -0.01em; margin-bottom: var(--s0); }
+.founder p { color: var(--mute); font-size: var(--t3); line-height: 1.7; max-width: 17em; }
 
-.intents { display: flex; flex-direction: column; gap: 0.9rem; margin-top: 0.8rem; }
-.intent { color: var(--paper); font-size: clamp(1.02rem, 1.3vw, 1.2rem); line-height: 1.75; }
-.intent span { color: var(--red-soft); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.32em; margin-right: 1em; display: inline-block; min-width: 11ch; }
-.contact-note { color: var(--mute); font-size: 1rem; margin-top: 1.6rem; max-width: 38em; line-height: 1.75; }
-.footer { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-top: 1.4rem; padding-top: 1.2rem; border-top: 1px solid rgba(244,242,238,0.1); font-size: 0.68rem; letter-spacing: 0.18em; color: var(--mute); }
+.intents { display: flex; flex-direction: column; gap: var(--s1); margin-top: var(--s1); }
+.intent { color: var(--paper); font-size: var(--t4); line-height: 1.7; }
+.intent span { color: var(--red-soft); margin-right: 1em; display: inline-block; min-width: 11ch; }
+.contact-note { margin-top: var(--s2); max-width: 38em; }
+.footer {
+  display: flex; justify-content: space-between; gap: var(--s1); flex-wrap: wrap;
+  margin-top: var(--s3); padding-top: var(--s2); border-top: 1px solid var(--hairline);
+  color: var(--mute);
+}
 
-/* ── WORK: schwarze Substanz-Sektion (50k Chess-Rows + Icon-Trio) ── */
+/* ── WORK: schwarze Substanz-Sektion ────── */
 .solid {
   position: relative; z-index: 3;
-  /* Film schimmert durch — der Scrub laeuft durch die ganze Page (Nicolas 2026-08-26) */
   background: rgba(5, 5, 5, 0.86);
-  padding: clamp(6rem, 14vh, 10rem) clamp(1.5rem, 6vw, 7rem);
+  padding: clamp(var(--s5), 14vh, 7rem) clamp(1.5rem, 6vw, 7rem);
 }
+.work-inner { max-width: 74em; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(var(--s4), 10vh, var(--s5)); }
+.chess-row { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+.chess-row.reverse .chess-video { order: 2; }
+.chess-row.reverse .chess-copy { order: 1; }
+.chess-video {
+  width: 100%; display: block;
+  filter: saturate(0.9) contrast(1.06) brightness(0.97);
+  -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 55%, transparent 98%);
+  mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 55%, transparent 98%);
+}
+.chess-copy .cta.solid { display: inline-block; margin-top: var(--s2); }
+.chess-copy .body-copy, .pillar .body-copy { margin-top: var(--s2); }
+.pillar > .textlink, .chess-copy > .textlink, .teams-row > .textlink { margin-left: 0; display: inline-block; margin-top: var(--s0); }
 .seam-ring {
   align-self: center;
   width: clamp(200px, 22vw, 360px);
@@ -230,33 +272,15 @@ body.js-on #hero .ctas { animation: rise var(--dur-3) var(--ease) 0.55s both; }
   -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 45%, transparent 72%);
   mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 45%, transparent 72%);
 }
-.work-inner { max-width: 74em; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(4rem, 10vh, 7rem); }
-.chess-row { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; }
-.chess-row.reverse .chess-video { order: 2; }
-.chess-row.reverse .chess-copy { order: 1; }
-.chess-video {
-  width: 100%; display: block;
-  /* Grading angeglichen an den Film, damit eine Bildsprache gilt */
-  filter: saturate(0.9) contrast(1.06) brightness(0.97);
-  -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 55%, transparent 98%);
-  mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 55%, transparent 98%);
-}
-.chess-copy .cta.solid { display: inline-block; margin-top: 1.6rem; }
-.pillar > .textlink, .chess-copy > .textlink, .teams-row > .textlink { margin-left: 0; display: inline-block; margin-top: 0.5rem; }
-.work-h { font-size: clamp(1.5rem, 2.9vw, 2.7rem); font-weight: 500; letter-spacing: -0.02em; text-wrap: balance; }
-.chess-copy .body-copy { margin-top: 0.9rem; }
-.teams-row { text-align: left; padding-top: clamp(1rem, 3vh, 2rem); border-top: 1px solid rgba(244,242,238,0.1); }
-.teams-line { display: flex; flex-wrap: wrap; gap: clamp(1.2rem, 4vw, 3.2rem); margin: 1.1rem 0 1rem; }
-.teams-line span { font-size: clamp(0.95rem, 1.6vw, 1.25rem); letter-spacing: 0.3em; font-weight: 500; color: var(--paper); white-space: nowrap; }
+
+.teams-row, .proof-row, .feature-trio { padding-top: var(--s2); border-top: 1px solid var(--hairline); }
+.teams-line { display: flex; flex-wrap: wrap; gap: clamp(1.2rem, 4vw, 3.2rem); margin: var(--s1) 0; }
+.teams-line span { font-size: var(--t4); letter-spacing: 0.35em; font-weight: 500; color: var(--paper); white-space: nowrap; }
 .teams-line span::before { content: "○ "; color: var(--red); letter-spacing: 0; margin-right: 0.35em; }
 .teams-row .body-copy { max-width: 34em; }
 
-.feature-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.6rem, 4vw, 3.5rem); padding-top: clamp(1rem, 3vh, 2rem); border-top: 1px solid rgba(244,242,238,0.1); }
-.f-idx { display: block; color: var(--red-soft); font-size: 0.68rem; letter-spacing: 0.32em; font-weight: 500; margin-bottom: 1.1rem; font-variant-numeric: tabular-nums; }
-
-/* ── Proof-Slots: designte Platzhalter fuer UI-Demos / House-Material ── */
-.proof-row { padding-top: clamp(1rem, 3vh, 2rem); border-top: 1px solid rgba(244,242,238,0.1); }
-.proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.6rem, 4vw, 3.5rem); margin-top: 1.1rem; }
+/* Proof-Slots: designte Platzhalter fuer UI-Demos / House-Material */
+.proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: var(--s1); }
 .proof-frame {
   aspect-ratio: 16 / 10;
   border: 1px solid rgba(244, 242, 238, 0.14);
@@ -274,26 +298,21 @@ body.js-on #hero .ctas { animation: rise var(--dur-3) var(--ease) 0.55s both; }
   width: 18px; height: 18px;
   border-bottom: 1px solid var(--red); border-right: 1px solid var(--red);
 }
-.proof-frame span { font-size: 0.68rem; letter-spacing: 0.42em; color: rgba(244, 242, 238, 0.35); font-weight: 500; }
+.proof-frame span { color: var(--faint); }
 .proof-slot { margin: 0; }
-.proof-slot figcaption { margin-top: 0.75rem; color: var(--mute); font-size: 0.82rem; line-height: 1.55; max-width: 26em; }
+.proof-slot figcaption { margin-top: var(--s1); max-width: 26em; }
 
-/* ── Founder-Portraits: Platzhalter-Monogramme (Fotos nach D10) ── */
-.portrait {
-  aspect-ratio: 3 / 4; max-width: 148px; margin-bottom: 1.1rem;
-  border: 1px solid rgba(244, 242, 238, 0.14); background: #0a0a0a;
-  display: flex; align-items: center; justify-content: center;
-}
-.portrait span { font-family: "Instrument Serif", serif; font-style: italic; font-size: 2.1rem; color: rgba(244, 242, 238, 0.25); }
-.feature h3 { font-size: 0.8rem; letter-spacing: 0.28em; font-weight: 500; margin-bottom: 0.5rem; }
-.feature p { color: var(--mute); font-size: 0.9rem; line-height: 1.65; max-width: 22em; }
+.feature-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); }
+.f-idx { display: block; color: var(--red-soft); margin-bottom: var(--s1); font-variant-numeric: tabular-nums; }
+.feature h3 { margin-bottom: var(--s0); color: var(--paper); }
+.feature p { color: var(--mute); font-size: var(--t3); line-height: 1.7; max-width: 22em; }
 
-/* ── Marquee: endlos laufende Marke-Zeile zwischen WORK und CLOSE ── */
+/* ── Marquee ────────────────────────────── */
 .marquee {
   position: relative; z-index: 3;
   background: var(--black);
-  border-top: 1px solid rgba(244, 242, 238, 0.1);
-  border-bottom: 1px solid rgba(244, 242, 238, 0.1);
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
   overflow: hidden;
   padding: 1.15rem 0;
 }
@@ -302,12 +321,28 @@ body.js-on #hero .ctas { animation: rise var(--dur-3) var(--ease) 0.55s both; }
   width: max-content;
   animation: marquee 40s linear infinite;
 }
-.marquee-track span { font-size: 0.68rem; letter-spacing: 0.42em; font-weight: 500; color: var(--mute); white-space: nowrap; }
+.marquee-track span { color: var(--mute); white-space: nowrap; }
 .marquee-track i { color: var(--red); font-style: normal; font-size: 0.45rem; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
-/* Choreografie: JS steuert opacity/transform direkt; ohne JS bleibt alles sichtbar.
-   will-change nur dort, wo der Pin wirklich animiert (sticky). */
+/* ── Loader ─────────────────────────────── */
+#loader {
+  position: fixed; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+  z-index: 50; color: rgba(244, 242, 238, 0.5);
+  font-family: "Inter", sans-serif;
+  text-align: center;
+}
+#loader .bar {
+  display: block; width: 128px; height: 1px; margin: 0.9rem auto 0;
+  background: rgba(244, 242, 238, 0.14); position: relative; overflow: hidden;
+}
+#loader .bar::after {
+  content: ""; position: absolute; inset: 0; background: var(--red);
+  transform-origin: left; transform: scaleX(var(--p, 0));
+  transition: transform 0.4s var(--ease);
+}
+
+/* Choreografie: JS steuert opacity/transform direkt; ohne JS bleibt alles sichtbar. */
 body.js-on .pin { will-change: auto; }
 @media (min-width: 721px) and (min-height: 561px) {
   body.js-on .pin { will-change: opacity, transform; }
@@ -325,24 +360,23 @@ body.js-on .pin { will-change: auto; }
   .marginalia { display: none; }
   .founders { grid-template-columns: 1fr; grid-template-areas: "assad" "nika" "alex"; }
   .f-assad, .f-nika { text-align: left; justify-self: start; }
-  .f-assad p { margin-inline: 0; }
+  .portrait { max-width: 118px; }
   /* Firm + Close: kein Sticky-Korsett auf kleinen Displays */
   #firm, #close { height: auto; }
-  #firm .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 4vh); padding-bottom: 4rem; justify-content: flex-start; background: rgba(5,5,5,0.86); }
-  .footer { flex-direction: column; gap: 0.5rem; }
+  #firm .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 4vh); padding-bottom: var(--s3); justify-content: flex-start; background: rgba(5,5,5,0.86); }
+  .footer { flex-direction: column; gap: var(--s0); }
   .chess-row, .chess-row.reverse { grid-template-columns: 1fr; }
   .chess-row.reverse .chess-video { order: 0; }
   .chess-row.reverse .chess-copy { order: 1; }
-  .feature-trio { grid-template-columns: 1fr; gap: 2rem; }
-  .proof-grid { grid-template-columns: 1fr; gap: 2rem; }
-  .portrait { max-width: 118px; }
+  .feature-trio { grid-template-columns: 1fr; gap: var(--s2); }
+  .proof-grid { grid-template-columns: 1fr; gap: var(--s2); }
   .seam-ring { width: 200px; }
 }
 
 /* Flache Querformat-Screens (Phones landscape): dieselbe Statik-Behandlung */
 @media (max-height: 560px) {
   #firm, #close { height: auto; }
-  #firm .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 2vh); padding-bottom: 3rem; justify-content: flex-start; }
+  #firm .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 2vh); padding-bottom: var(--s2); justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
