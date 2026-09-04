@@ -272,11 +272,43 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 #contact .body-copy { max-width: 38em; }
 
 /* Fokus-Liste (Sektoren): Tabelle mit Label-Spalte und Hairlines, eine Zeile hell, Fokus wandert mit dem Scroll */
-.focus-list { display: flex; flex-direction: column; margin-top: var(--s3); max-width: 44em; border-top: 1px solid var(--hairline); }
+.focus-list { display: flex; flex-direction: column; margin-top: var(--s3); max-width: 44em; border-top: 1px solid var(--hairline); perspective: 1100px; perspective-origin: 85% 50%; }
+/* Scroll-Entfaltung (JS setzt --t je Zeile 0..1): Zeile wischt aus der Tiefe ins Bild, Text bricht wie aus Stein hervor */
 .focus-list p {
+  --t: 1; --tb: clamp(0, calc(var(--t) * 1.25), 1); --td: clamp(0, calc(var(--t) * 1.35 - 0.35), 1);
+  position: relative;
   display: grid; grid-template-columns: 9.5em 1fr; gap: var(--s2); align-items: baseline;
   padding: 0.85em 0; border-bottom: 1px solid var(--hairline);
   color: var(--faint); transition: color var(--dur-2) var(--ease);
+  transform-origin: 0% 50%;
+  transform: translate3d(calc((1 - var(--t)) * 9vw), 0, calc((1 - var(--t)) * -420px)) rotateY(calc((1 - var(--t)) * -16deg));
+  opacity: clamp(0, calc(var(--t) * 3), 1);
+  border-bottom-color: rgba(244, 242, 238, calc(0.10 * var(--t)));
+}
+body.js-on .focus-list p { will-change: transform, opacity; }
+/* Erosionsmaske: ein Bild (links leer, Stein-Kante, rechts voll) wandert mit --t ueber Label und Text */
+.focus-list p > b, .focus-list p > .d {
+  -webkit-mask-image: url("media/erode-mask.png"); mask-image: url("media/erode-mask.png");
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.focus-list p > b { -webkit-mask-position: calc(var(--tb) * 100%) 0; mask-position: calc(var(--tb) * 100%) 0; }
+.focus-list p > .d { -webkit-mask-position: calc(var(--td) * 100%) 0; mask-position: calc(var(--td) * 100%) 0; }
+/* Stein-Splitter aus dem Film: fliegt mit der Zeile aus der Tiefe herein und verglueht hinter dem Label */
+.focus-list p::before {
+  content: ""; position: absolute; left: -2.5em; top: 50%; width: 9em; height: 6em; z-index: -1; pointer-events: none;
+  background: var(--shard) center / contain no-repeat;
+  opacity: calc((1 - var(--t)) * 1.1 * clamp(0, calc(var(--t) * 6), 1));
+  transform: translate3d(calc((1 - var(--t)) * 22vw), calc(-50% + (1 - var(--t)) * -6vh), calc((1 - var(--t)) * 260px)) rotate(calc((1 - var(--t)) * 48deg)) scale(calc(0.7 + (1 - var(--t)) * 0.8));
+  filter: drop-shadow(0 0 14px rgba(255, 42, 35, 0.55));
+}
+/* Glut an der Kante: kleines rotes Leuchten, das mit dem Text-Wipe laeuft */
+.focus-list p::after {
+  content: ""; position: absolute; top: 50%; left: calc(9.5em + var(--s2) + var(--td) * (100% - 9.5em - var(--s2)) - 0.6em); width: 1.2em; height: 1.2em; z-index: -1;
+  border-radius: 50%; background: radial-gradient(circle, rgba(255, 42, 35, 0.95) 0%, rgba(255, 42, 35, 0.35) 40%, rgba(255, 42, 35, 0) 70%);
+  transform: translateY(-50%) scale(calc(1 + (1 - var(--td)) * 1.5));
+  opacity: calc(clamp(0, calc(var(--td) * 8), 1) * clamp(0, calc((1 - var(--td)) * 5), 1));
+  pointer-events: none;
 }
 .focus-list p.on { color: var(--mute); }
 .focus-list p b { font-weight: 500; color: var(--faint); font-size: var(--t2); letter-spacing: 0.3em; text-transform: uppercase; transition: color var(--dur-2) var(--ease); }
@@ -389,6 +421,10 @@ body.js-on .pin { will-change: auto; }
   .slot p { display: none; }               /* mobil nur Index + Titel, Text folgt auf der Case-Seite */
   .focus-list { margin-top: var(--s2); }
   .focus-list p { grid-template-columns: 1fr; gap: var(--s0); padding: 0.6em 0; }
+  .focus-list { perspective: 700px; perspective-origin: 90% 50%; }
+  .focus-list p { transform: translate3d(calc((1 - var(--t)) * 14vw), 0, calc((1 - var(--t)) * -220px)) rotateY(calc((1 - var(--t)) * -12deg)); }
+  .focus-list p::before { width: 6em; height: 4em; left: -1em; }
+  .focus-list p::after { left: calc(var(--tb) * 100% - 0.6em); }
   #forging { height: 160vh; }
   #hand { height: 100vh; }
   #treehold { height: 240vh; }
@@ -430,6 +466,7 @@ body.js-on .pin { will-change: auto; }
 @media (prefers-reduced-motion: reduce) {
   body.js-on .pin { opacity: 1 !important; transform: none !important; }
   body.js-on .reveal span { opacity: 1 !important; transform: none !important; }
-  .focus-list p { color: var(--paper); }
+  .focus-list p { color: var(--paper); --t: 1 !important; transform: none !important; }
+  .focus-list p::before, .focus-list p::after { display: none; }
   #hero .display span, #hero .sub { animation: none !important; }
 }

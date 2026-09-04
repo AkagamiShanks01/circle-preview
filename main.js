@@ -30,6 +30,7 @@
         p.el.style.opacity = ""; p.el.style.transform = "";
         for (const l of p.lines || []) { l.style.opacity = ""; l.style.transform = ""; }
         for (const f of p.focus || []) f.classList.add("on");
+        for (const f of p.focus || []) f.style.setProperty("--t", "1");
         p.focusIdx = -1;
       }
     }
@@ -40,6 +41,7 @@
   for (const pn of pins) {
     pn.lines = [...pn.el.querySelectorAll(".reveal span")];
     pn.focus = [...pn.el.querySelectorAll("[data-focus] > p")];
+    pn.focusT = pn.focus.map(() => -1);
     pn.focusIdx = -1;
   }
   classifyPins(); // erneut, jetzt mit lines/focus bekannt (statische Pins bekommen alle Absaetze hell)
@@ -144,7 +146,14 @@
       // Fokus-Liste: der aktive Absatz folgt dem Sektionsfortschritt zwischen 10% und 84%
       if (pn.focus.length) {
         const n = pn.focus.length;
-        const t = Math.min(0.999, Math.max(0, (p - 0.10) / 0.74));
+        // Entfaltung: Zeile i wischt zwischen p=0.04+i*0.05 und +0.14 aus der Tiefe herein (CSS liest --t)
+        for (let i = 0; i < n; i++) {
+          const u = Math.min(1, Math.max(0, (p - 0.04 - i * 0.05) / 0.14));
+          const eu = u < 1 ? ease(u) : 1;
+          if (pn.focusT[i] !== eu) { pn.focus[i].style.setProperty("--t", eu.toFixed(3)); pn.focusT[i] = eu; }
+        }
+        // Fokus wandert erst, wenn alle Zeilen stehen (ab p=0.34)
+        const t = Math.min(0.999, Math.max(0, (p - 0.34) / 0.50));
         const idx = inF < 0.5 ? 0 : Math.floor(t * n);
         if (idx !== pn.focusIdx) {
           pn.focus.forEach((el, i) => el.classList.toggle("on", i === idx));
