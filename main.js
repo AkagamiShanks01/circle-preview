@@ -92,7 +92,18 @@
     const r = teamEl.getBoundingClientRect();
     const teamIn = r.top < innerHeight * 0.55 ? ease(1 - Math.max(0, r.top) / (innerHeight * 0.55)) : 0;
     nodesEl.style.opacity = (g * (1 - teamIn)).toFixed(3);
+    nodesEl.classList.toggle("live", g > 0.4 && teamIn < 0.6);
   }
+  // Gestaffeltes Einblenden (Stamm -> Aeste) und sanftes Scrollen zur Sektion beim Klick
+  nodeEls.forEach((n, i) => {
+    n.style.setProperty("--delay", `${(i * 0.12).toFixed(2)}s`);
+    n.addEventListener("click", (e) => {
+      const target = document.querySelector(n.getAttribute("href"));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    });
+  });
   // Faden: waechst von oben durch die Ast-Sektionen (Team bis Masterminds) mit dem Scroll
   function updateThread() {
     if (!threadEl || !teamEl || !mmEl) return;

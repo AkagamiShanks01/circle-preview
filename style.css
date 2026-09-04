@@ -157,12 +157,33 @@ em.red { color: var(--red-soft); }
   position: absolute; transform: translate(-50%, -100%);
   display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
   color: var(--paper); text-decoration: none; pointer-events: auto;
-  padding-bottom: 2.4rem;   /* Platz fuer Stiel + Ring */
+  padding: 0.6rem 0.9rem 2.6rem;   /* Platz fuer Stiel + Ring, Hover-Flaeche */
+  opacity: 0; translate: 0 0.6rem;
+  transition: opacity var(--dur-2) var(--ease), translate var(--dur-2) var(--ease), scale var(--dur-2) var(--ease);
+  transition-delay: var(--delay, 0s);
+  transform-origin: 50% 100%;
 }
-.node i { position: absolute; bottom: 0.45rem; width: 1px; height: 1.9rem; background: linear-gradient(to bottom, rgba(244,242,238,0.9), rgba(255,42,35,0.9)); }
-.node::after { content: ""; position: absolute; bottom: -0.1rem; width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 1px solid var(--red-soft); box-shadow: 0 0 10px rgba(255,42,35,0.7); }
+.nodes.live .node { opacity: 1; translate: 0 0; }
+.node i { position: absolute; bottom: 0.45rem; width: 1px; height: 1.9rem; transform-origin: bottom; transform: scaleY(0); background: linear-gradient(to bottom, rgba(244,242,238,0.9), rgba(255,42,35,0.9)); transition: transform var(--dur-2) var(--ease); transition-delay: calc(var(--delay, 0s) + 0.15s); }
+.nodes.live .node i { transform: scaleY(1); }
+.node::after { content: ""; position: absolute; bottom: -0.1rem; width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 1px solid var(--red-soft); box-shadow: 0 0 10px rgba(255,42,35,0.7); transition: transform var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease); }
+.nodes.live .node::after { animation: pulse 2.4s var(--ease) infinite; animation-delay: var(--delay, 0s); }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 10px rgba(255,42,35,0.7); } 50% { box-shadow: 0 0 22px rgba(255,42,35,1), 0 0 44px rgba(255,42,35,0.5); } }
 .node span { font-size: var(--t0); letter-spacing: 0.3em; color: var(--faint); font-variant-numeric: tabular-nums; }
-.node b { font-size: var(--t1); letter-spacing: 0.4em; text-transform: uppercase; font-weight: 500; white-space: nowrap; text-shadow: 0 1px 12px rgba(5,5,5,0.9); }
+.node b { font-size: var(--t1); letter-spacing: 0.4em; text-transform: uppercase; font-weight: 500; white-space: nowrap; text-shadow: 0 1px 12px rgba(5,5,5,0.9); transition: letter-spacing var(--dur-2) var(--ease); }
+/* Hover: Knoten waechst, der Inhalt klappt auf */
+.node small {
+  display: block; max-width: 15em; text-align: center; font-size: var(--t3); line-height: 1.5; color: var(--mute);
+  max-height: 0; opacity: 0; overflow: hidden; margin-top: 0;
+  transition: max-height var(--dur-2) var(--ease), opacity var(--dur-2) var(--ease), margin-top var(--dur-2) var(--ease);
+}
+@media (hover: hover) {
+  .node:hover, .node:focus-visible { scale: 1.12; z-index: 2; }
+  .node:hover b, .node:focus-visible b { letter-spacing: 0.5em; }
+  .node:hover small, .node:focus-visible small { max-height: 8em; opacity: 1; margin-top: 0.4rem; }
+  .node:hover::after, .node:focus-visible::after { transform: scale(1.6); box-shadow: 0 0 26px rgba(255,42,35,1), 0 0 60px rgba(255,42,35,0.6); animation: none; }
+  .nodes.live:hover .node:not(:hover) { opacity: 0.45; }
+}
 
 /* Der Faden: fixe Linie an der Kicker-Kante, waechst mit dem Scroll durch die Ast-Sektionen */
 .thread {
@@ -366,7 +387,9 @@ body.js-on .pin { will-change: auto; }
   /* mobil: die Knoten als Liste unten links (Portrait-Crop zeigt nur zwei Aeste) */
   .nodes { position: absolute; inset: auto 1.2rem 9vh 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
   .node { position: static !important; transform: none; flex-direction: row; align-items: baseline; gap: 0.8rem; padding: 0 0 0 1.6rem; }
-  .node i { left: 0; bottom: auto; top: 50%; width: 1.1rem; height: 1px; transform: translateY(-50%); background: rgba(255,42,35,0.8); }
+  .node { opacity: 1; translate: 0 0; padding: 0 0 0 1.6rem; flex-wrap: wrap; row-gap: 0.15rem; }
+  .node small { max-height: none; opacity: 1; margin: 0; flex-basis: 100%; text-align: left; font-size: var(--t2); letter-spacing: 0; text-transform: none; color: var(--faint); }
+  .node i { left: 0; bottom: auto; top: 0.6rem; width: 1.1rem; height: 1px; transform: none; background: rgba(255,42,35,0.8); }
   .node::after { left: -0.2rem; bottom: auto; top: 50%; transform: translateY(-50%); }
   .thread { left: 1.2rem; }
   .focus-list p:not(.on) .d { display: none; }   /* mobil: nur der aktive Sektor zeigt seine Zeile */
