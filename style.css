@@ -1,7 +1,7 @@
-/* THE CIRCLE — Design-System (Rebuild 2026-09-03)
+/* THE CIRCLE — Design-System (IA v2 nach Miro, 2026-09-04)
  * Ein System, keine Freigrade: 6 Typo-Tieres, eine Raumskala,
  * ein Letter-Spacing-Set, eine Ease-Familie. Alles darunter ist Token.
- * Acht Sektionen: sieben im Scroll-Film, eine statisch schwarz (Founders).
+ * Zehn Sektionen: acht im Scroll-Film, zwei statisch schwarz mit Verlaufs-Seams.
  */
 :root {
   /* Farben */
@@ -12,6 +12,7 @@
   --faint: rgba(244, 242, 238, 0.35);
   --hairline: rgba(244, 242, 238, 0.1);
   --black: #050505;
+  --solid: rgba(5, 5, 5, 0.94);
   --navh: calc(88px + env(safe-area-inset-top, 0px));
 
   /* Raumskala */
@@ -19,12 +20,12 @@
 
   /* Typo-Tieres (Groesse) — Tier 0 bis 5 */
   --t0: 0.6rem;                                   /* Micro: Nav-Klein, Footer, Debug */
-  --t1: 0.7rem;                                   /* Label: Kicker, Lockup */
+  --t1: 0.7rem;                                   /* Label: Kicker, Lockup, Slot-Index */
   --t2: 0.75rem;                                  /* Small-Label: Founder-Disziplin */
   --t3: clamp(0.95rem, 1.15vw, 1.06rem);          /* Body */
   --t4: clamp(1rem, 1.5vw, 1.2rem);               /* Team-Line */
   --t5h: clamp(1.6rem, 3vw, 2.8rem);              /* H2: Pillars, Founders, Contact */
-  --t5s: clamp(1.9rem, 4vw, 4rem);                /* Scene-Line: Thesis */
+  --t5s: clamp(1.9rem, 4vw, 4rem);                /* Scene-Line: Bridge */
   --t5d: clamp(2.7rem, 7vw, 7rem);                /* Display: nur Hero */
 
   /* Zeit */
@@ -58,22 +59,17 @@ em.red { color: var(--red-soft); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* ── Typo-Tieres als Klassen ─────────────── */
-/* T0 Micro: 0.6rem / 0.35em / 500 */
 .nav-contact, .marginalia, .footer,
 #loader { font-size: var(--t0); letter-spacing: 0.35em; font-weight: 500; }
 
-/* T1 Label: 0.7rem / 0.4em / 500 */
-.kicker, .lockup { font-size: var(--t1); letter-spacing: 0.4em; font-weight: 500; }
+.kicker, .lockup, .slot .idx, .screen .frame span { font-size: var(--t1); letter-spacing: 0.4em; font-weight: 500; }
 
-/* T2 Small-Label: 0.75rem / 0.3em / 500 */
 .founder .lab { font-size: var(--t2); letter-spacing: 0.3em; font-weight: 500; text-transform: uppercase; }
 
-/* T3 Body: 1.06rem / 1.7 */
-.sub, .body-copy, .founder .line {
+.sub, .body-copy, .founder .line, .slot p, .screen figcaption, .focus-list p {
   font-size: var(--t3); line-height: 1.7; color: var(--mute);
 }
 
-/* T5 Scene-Line: 4rem / 1.05 / 500 / -0.02em */
 .scene-line {
   font-size: var(--t5s); line-height: 1.05; font-weight: 500;
   letter-spacing: -0.02em; text-wrap: balance;
@@ -96,6 +92,7 @@ em.red { color: var(--red-soft); }
   z-index: 1; pointer-events: none;
   background: linear-gradient(100deg, rgba(5,5,5,0.82) 0%, rgba(5,5,5,0.55) 26%, rgba(5,5,5,0.18) 44%, rgba(5,5,5,0) 60%);
 }
+/* Grain: dritte Ebene, driftet mit 0.3-fachem Scroll (JS setzt background-position) */
 .grain {
   position: fixed; inset: 0;
   z-index: 2; pointer-events: none; opacity: 0.05;
@@ -136,13 +133,14 @@ em.red { color: var(--red-soft); }
 /* ── scenes ─────────────────────────────── */
 .scene { position: relative; z-index: 3; }
 .pin .copy { text-shadow: 0 1px 2px rgba(5,5,5,0.6), 0 0 26px rgba(5,5,5,0.42); }
-#hero         { height: 200vh; }
-#thesis       { height: 170vh; }
-#ventures     { height: 170vh; }
-#intelligence { height: 170vh; }
-#teams        { height: 170vh; }
-#master       { height: 170vh; }
-#close        { height: 170vh; }
+#hero        { height: 200vh; }
+#focus       { height: 220vh; }   /* laenger: fuenf Fokus-Absaetze wandern */
+#proof       { height: 170vh; }
+#bridge      { height: 140vh; }
+#team        { height: 170vh; }
+#edu         { height: 170vh; }
+#masterminds { height: 160vh; }
+#close       { height: 170vh; }
 
 .pin {
   position: sticky; top: 0;
@@ -153,6 +151,7 @@ em.red { color: var(--red-soft); }
 .pin.center { align-items: center; text-align: center; }
 
 .copy { position: relative; max-width: 40em; }
+.copy.wide { max-width: 56em; }
 .copy-center { padding: clamp(2rem, 6vw, 4rem); max-width: none; display: flex; flex-direction: column; align-items: center; }
 .copy-center::before {
   content: "";
@@ -160,11 +159,14 @@ em.red { color: var(--red-soft); }
   z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(5,5,5,0.8) 0%, rgba(5,5,5,0.45) 28%, rgba(5,5,5,0) 52%);
 }
-.copy-center .body-copy { margin-top: var(--s3); max-width: 34em; text-align: center; }
+.copy-center .body-copy { margin-top: var(--s3); max-width: 34em; text-align: center; font-size: var(--t4); }
+
+/* Zeilen-Reveal: JS setzt opacity/transform je Zeile mit Versatz; ohne JS alles sichtbar */
+.reveal span { display: block; }
+body.js-on .reveal span { will-change: opacity, transform; }
 
 /* ── Hero (Display-Tier) ────────────────── */
 .display { font-size: var(--t5d); line-height: 1; font-weight: 500; letter-spacing: -0.03em; text-wrap: balance; }
-.display span { display: block; }
 
 /* Intro-Choreografie: gestaffelter Auftakt beim ersten Paint */
 @keyframes rise { from { opacity: 0; transform: translateY(1.1em); } to { opacity: 1; transform: none; } }
@@ -172,7 +174,7 @@ body.js-on #hero .display span { animation: rise var(--dur-3) var(--ease) both; 
 body.js-on #hero .display span:nth-child(2) { animation-delay: 0.12s; }
 body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 
-.sub { margin-top: var(--s3); max-width: 26em; }
+.sub { margin-top: var(--s3); max-width: 28em; }
 
 .textlink {
   color: var(--paper); text-decoration: none; border-bottom: 1px solid var(--red);
@@ -186,40 +188,74 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
   .nav-contact:hover { color: var(--paper); border-color: rgba(255, 42, 35, 0.55); }
 }
 
-/* ── Pillars (H2-Tier): Ventures, Intelligence, Teams, Master Circle, Contact ── */
+/* ── Pillars (H2-Tier) ─────────────────── */
 .kicker { color: var(--red-soft); margin-bottom: var(--s1); display: block; }
-.pillar h2, .founders-block h2 {
+.pillar h2, .solid h2 {
   font-size: var(--t5h); line-height: 1.15; font-weight: 500;
   letter-spacing: -0.02em; text-wrap: balance;
 }
 .body-copy { margin-top: var(--s2); max-width: 34em; text-shadow: 0 1px 14px rgba(5,5,5,0.9); }
-.pillar.small .body-copy { margin-top: 0; max-width: 30em; }
+.body-copy + .body-copy { margin-top: var(--s1); }
 #contact .body-copy { max-width: 38em; }
 
-/* Team-Line: eine Zeile, drei Namen, Mitte-Punkte — keine Kacheln, keine Icons */
+/* Fokus-Liste (Sektoren): ein Absatz hell, die anderen gedimmt, Fokus wandert mit dem Scroll */
+.focus-list { display: flex; flex-direction: column; gap: var(--s1); margin-top: var(--s3); max-width: 40em; }
+.focus-list p { color: var(--faint); transition: color var(--dur-2) var(--ease); }
+.focus-list p.on { color: var(--paper); }
+.focus-list p b { font-weight: 500; color: inherit; }
+
+/* Team-Line: eine Zeile, drei Namen, Mitte-Punkte */
 .team-line {
   display: flex; flex-wrap: wrap; align-items: baseline;
   gap: clamp(0.8rem, 2vw, 1.6rem);
   margin-top: var(--s2);
-  font-size: var(--t4); letter-spacing: 0.35em; font-weight: 500; color: var(--paper);
+  font-size: clamp(0.8rem, 1.05vw, 1rem); letter-spacing: 0.3em; font-weight: 500; color: var(--paper);
 }
 .team-line i { color: var(--faint); font-style: normal; letter-spacing: 0; }
 
-/* ── Founders: die eine statisch schwarze Sektion ── */
+/* Proof-Slots: drei Cases in Hairline-Rahmen (Visual Variant V3, wachsen mit den Companies) */
+.slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2.5vw, 2rem); margin-top: var(--s3); }
+.slot { border: 1px solid var(--hairline); padding: clamp(1rem, 2vw, 1.6rem); background: rgba(5,5,5,0.35); display: flex; flex-direction: column; gap: var(--s1); }
+.slot .idx { color: var(--red-soft); }
+.slot h3 { font-size: clamp(1rem, 1.4vw, 1.2rem); font-weight: 500; letter-spacing: -0.01em; line-height: 1.3; }
+.slot p { max-width: none; }
+
+/* ── Statisch schwarze Bloecke mit Verlaufs-Seams (kein harter Schnitt) ── */
 .solid {
   position: relative; z-index: 3;
-  background: rgba(5, 5, 5, 0.94);
+  background: var(--solid);
   padding: clamp(var(--s5), 14vh, 7rem) clamp(1.5rem, 6vw, 7rem);
 }
+.solid.seam { margin-top: 24vh; margin-bottom: 24vh; }
+.solid.seam::before, .solid.seam::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 24vh; pointer-events: none;
+}
+.solid.seam::before { top: -24vh; background: linear-gradient(to bottom, rgba(5,5,5,0), var(--solid)); }
+.solid.seam::after { bottom: -24vh; background: linear-gradient(to top, rgba(5,5,5,0), var(--solid)); }
 .solid-inner { max-width: 74em; margin: 0 auto; }
+.solid .body-copy { text-shadow: none; }
+
+/* Intelligence-Screens: drei Rahmen mit Caption (Platzhalter bis Produkt-Screens vorliegen) */
+.screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 3rem); margin-top: var(--s4); }
+.screen { margin: 0; }
+.screen .frame {
+  aspect-ratio: 16 / 10; border: 1px solid rgba(244, 242, 238, 0.14); background: #0a0a0a;
+  display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+}
+.screen .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.screen .frame span { color: var(--faint); }
+.screen figcaption { margin-top: var(--s1); max-width: 26em; }
+
+/* ── Founders ───────────────────────────── */
 .founders-block h2 { margin-bottom: var(--s4); }
 .founders {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--s3) clamp(1.5rem, 3vw, 3rem);
 }
+.founder { display: flex; flex-direction: column; align-items: flex-start; }
 .portrait {
-  aspect-ratio: 3 / 4; max-width: 220px; margin-bottom: var(--s1);
+  aspect-ratio: 3 / 4; width: 100%; max-width: 220px; margin-bottom: var(--s1);
   border: 1px solid rgba(244, 242, 238, 0.14); background: #0a0a0a;
   display: flex; align-items: center; justify-content: center;
 }
@@ -227,6 +263,7 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 .founder h3 { font-size: clamp(1.05rem, 1.4vw, 1.25rem); font-weight: 500; letter-spacing: -0.01em; margin-bottom: var(--s0); }
 .founder .lab { color: var(--mute); margin-bottom: var(--s1); }
 .founder .line { max-width: 20em; }
+.founder .textlink { margin-top: var(--s1); }
 
 /* ── Footer (in Contact) ────────────────── */
 .footer {
@@ -263,27 +300,39 @@ body.js-on .pin { will-change: auto; }
 @media (max-width: 720px) {
   :root { --navh: calc(64px + env(safe-area-inset-top, 0px)); }
   .nav { padding-left: 1.2rem; padding-right: 1.2rem; background: linear-gradient(to bottom, rgba(5,5,5,0.97) 0%, rgba(5,5,5,0.85) 60%, rgba(5,5,5,0) 100%); }
+  .nav-contact { display: inline-block; font-size: 0.55rem; padding: 0.8em 1.3em; }
   .shade { background: linear-gradient(to bottom, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0) 30%, rgba(5,5,5,0) 55%, rgba(5,5,5,0.72) 82%, rgba(5,5,5,0.85) 100%); }
   .pin { justify-content: flex-end; padding-bottom: 9vh; }
   .pin.center { justify-content: center; }
   #hero .pin { justify-content: center; padding-bottom: 14vh; }
-  .nav-contact { display: none; }
   .marginalia { display: none; }
+  .slots { grid-template-columns: 1fr; gap: var(--s1); margin-top: var(--s2); }
+  .slot p { display: none; }               /* mobil nur Index + Titel, Text folgt auf der Case-Seite */
+  .focus-list { gap: var(--s0); margin-top: var(--s2); }
+  .focus-list p:not(.on) .d { display: none; }   /* mobil: nur der aktive Sektor zeigt seine Zeile */
+  #focus { height: 240vh; }
+  .screens { grid-template-columns: 1fr; gap: var(--s2); }
   .founders { grid-template-columns: 1fr; }
   .portrait { max-width: 160px; }
-  /* Contact: kein Sticky-Korsett auf kleinen Displays */
-  #close { height: auto; }
-  #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 4vh); padding-bottom: var(--s3); justify-content: flex-start; background: rgba(5,5,5,0.86); }
+  .solid.seam { margin-top: 12vh; margin-bottom: 12vh; }
+  .solid.seam::before, .solid.seam::after { height: 12vh; }
+  .solid.seam::before { top: -12vh; }
+  .solid.seam::after { bottom: -12vh; }
+  /* Proof + Contact: kein Sticky-Korsett auf kleinen Displays */
+  #proof, #close { height: auto; }
+  #proof .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 4vh); padding-bottom: var(--s3); justify-content: flex-start; background: rgba(5,5,5,0.86); }
   .footer { flex-direction: column; gap: var(--s0); }
 }
 
 /* Flache Querformat-Screens (Phones landscape): dieselbe Statik-Behandlung */
 @media (max-height: 560px) {
-  #close { height: auto; }
-  #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 2vh); padding-bottom: var(--s2); justify-content: flex-start; }
+  #proof, #close { height: auto; }
+  #proof .pin, #close .pin { position: static; height: auto; min-height: 100svh; padding-top: calc(var(--navh) + 2vh); padding-bottom: var(--s2); justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   body.js-on .pin { opacity: 1 !important; transform: none !important; }
+  body.js-on .reveal span { opacity: 1 !important; transform: none !important; }
+  .focus-list p { color: var(--paper); }
   #hero .display span, #hero .sub { animation: none !important; }
 }

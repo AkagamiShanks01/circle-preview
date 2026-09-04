@@ -24,11 +24,26 @@
     for (const p of pins) {
       const wasStatic = p.static;
       p.static = getComputedStyle(p.el).position !== "sticky";
-      if (p.static && !wasStatic) { p.el.style.opacity = ""; p.el.style.transform = ""; }
+      if (p.static && !wasStatic) {
+        // Statische Pins (Mobil): alle Choreografie-Reste zuruecksetzen, sonst bleiben
+        // Reveal-Zeilen nach einem Viewport-Wechsel unsichtbar
+        p.el.style.opacity = ""; p.el.style.transform = "";
+        for (const l of p.lines || []) { l.style.opacity = ""; l.style.transform = ""; }
+        for (const f of p.focus || []) f.classList.add("on");
+        p.focusIdx = -1;
+      }
     }
   }
   classifyPins();
   const ease = (t) => (t < 0 ? 0 : t > 1 ? 1 : t * (2 - t));
+  // Pro Pin: Zeilen-Reveal (Ueberschriften) und Fokus-Liste (Sektoren) vorab einsammeln
+  for (const pn of pins) {
+    pn.lines = [...pn.el.querySelectorAll(".reveal span")];
+    pn.focus = [...pn.el.querySelectorAll("[data-focus] > p")];
+    pn.focusIdx = -1;
+  }
+  classifyPins(); // erneut, jetzt mit lines/focus bekannt (statische Pins bekommen alle Absaetze hell)
+  const grainEl = document.getElementById("grain");
   function choreograph() {
     // Erst alle Layout-Reads, dann alle Style-Writes (kein Thrashing)
     const reads = [];
@@ -44,8 +59,28 @@
       const outF = pn.section === lastSection ? 1 : 1 - ease((p - 0.84) / 0.10);
       const o = Math.min(inF, outF);
       pn.el.style.opacity = o.toFixed(3);
-      pn.el.style.transform = o > 0.02 ? `translateY(${((1 - inF) * 4).toFixed(2)}vh)` : "translateY(4vh)";
+      // Copy driftet 2vh langsamer als der Scroll (dritte Ebene neben Film und Grain)
+      const drift = (1 - inF) * 4 - p * 2;
+      pn.el.style.transform = o > 0.02 ? `translateY(${drift.toFixed(2)}vh)` : "translateY(4vh)";
+      // Zeilen-Reveal: jede Zeile 0.12 spaeter, ueber 0.5 der Einblendung
+      for (let i = 0; i < pn.lines.length; i++) {
+        const li = ease((inF - i * 0.12) / 0.5);
+        const s = pn.lines[i].style;
+        s.opacity = li.toFixed(3);
+        s.transform = li < 0.999 ? `translateY(${((1 - li) * 0.4).toFixed(3)}em)` : "";
+      }
+      // Fokus-Liste: der aktive Absatz folgt dem Sektionsfortschritt zwischen 10% und 84%
+      if (pn.focus.length) {
+        const n = pn.focus.length;
+        const t = Math.min(0.999, Math.max(0, (p - 0.10) / 0.74));
+        const idx = inF < 0.5 ? 0 : Math.floor(t * n);
+        if (idx !== pn.focusIdx) {
+          pn.focus.forEach((el, i) => el.classList.toggle("on", i === idx));
+          pn.focusIdx = idx;
+        }
+      }
     }
+    if (grainEl) grainEl.style.backgroundPosition = `0 ${(-(scrollY * 0.3) % 300).toFixed(1)}px`;
   }
 
   const pbar = document.getElementById("pbar");
