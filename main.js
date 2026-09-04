@@ -365,7 +365,7 @@
     const portrait = portraitMQ.matches;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const small = innerWidth * dpr <= 1024;
-    const total = 918;   // seq8/seqp8/seqm8: jeder 3. Frame des 4K60-Masters v3, alle Tiers gleich indiziert
+    const total = 918;   // seq9/seqp9/seqm9: jeder 3. Frame des 4K60-Masters v3, alle Tiers gleich indiziert
     // Fine-Ebene nur so gross dekodieren, wie das Canvas wirklich zeichnet
     // (Frames 16:9 bzw. 9:16, cover-geskalattet) — schont Decode/Budget und
     // eliminiert Eviction-Churn, ohne jemals weicher als nativ zu sein.
@@ -375,7 +375,7 @@
       : Math.max(960, Math.min(1920, Math.ceil(Math.max(vw, (vh * 16) / 9))));
     return {
       portrait, small,
-      dir: portrait ? "seqp8" : (small ? "seqm8" : "seq8"),
+      dir: portrait ? "seqp9" : (small ? "seqm9" : "seq9"),
       total,
       start: portrait ? 14 : 0,  // Mobil startet der Film mit sichtbarem Ring statt Void
       end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
@@ -458,7 +458,7 @@
   async function getStandinBlob(j) {
     const c = standinBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqm8/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqm9/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`m${j}`);
     const blob = await r.blob();
     standinBlobs.set(j, blob);
@@ -503,7 +503,7 @@
   async function getCoarseBlob(j) {
     const c = coarseBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqc8/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqc9/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`c${j}`);
     const blob = await r.blob();
     coarseBlobs.set(j, blob);

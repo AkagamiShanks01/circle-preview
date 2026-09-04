@@ -86,10 +86,10 @@ em.red { color: var(--red-soft); }
   position: fixed; inset: 0;
   width: 100vw; height: 100vh; height: 100svh;
   z-index: 0;
-  background: var(--black) url("seq8/f0001.webp") center / cover no-repeat;
+  background: var(--black) url("seq9/f0001.webp") center / cover no-repeat;
 }
 @media (orientation: portrait) {
-  #film { background-image: url("seqp8/f0001.webp"); }
+  #film { background-image: url("seqp9/f0001.webp"); }
 }
 
 /* Funken-Ebene ueber dem Film, unter dem Scrim */
@@ -176,6 +176,14 @@ em.red { color: var(--red-soft); }
   transform-origin: 50% 100%;
 }
 .nodes.live .node { opacity: 1; translate: 0 0; }
+/* Die Elemente steigen aus dem Magma: Label kommt weissheiss von unten und kuehlt auf Papier ab */
+.node b { color: var(--paper); }
+.nodes.live .node b { animation: emerge 1.4s var(--ease) both; animation-delay: calc(var(--delay, 0s) + 0.35s); }
+@keyframes emerge {
+  0% { color: #fff; text-shadow: 0 0 18px rgba(255,120,100,1), 0 0 40px rgba(255,42,35,0.9); transform: translateY(0.9em); opacity: 0; }
+  35% { opacity: 1; }
+  100% { color: var(--paper); text-shadow: 0 1px 12px rgba(5,5,5,0.9); transform: none; opacity: 1; }
+}
 /* Zuend-Buehne: 1920x1080-Frame-Raum, JS skaliert sie wie das Canvas (Cover) */
 .stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; pointer-events: none; }
 .pulse { position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; opacity: 0;
@@ -572,5 +580,6 @@ body.js-on .pin { will-change: auto; }
   .screen .frame, .founder, .portrait span { transform: none !important; opacity: 1 !important; }
   .portrait, .founder h3, .founder .lab, .founder .line, .founder .textlink, .screen figcaption { opacity: 1 !important; -webkit-mask-position: 100% 0 !important; mask-position: 100% 0 !important; }
   .pulse, .thread::after { animation: none !important; opacity: 0 !important; }
+  .nodes.live .node b { animation: none !important; }
   #hero .display > span, #hero .sub { animation: none !important; }
 }
