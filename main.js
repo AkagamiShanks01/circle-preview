@@ -31,6 +31,7 @@
         for (const l of p.lines || []) { l.style.opacity = ""; l.style.transform = ""; }
         for (const f of p.focus || []) f.classList.add("on");
         for (const f of p.focus || []) f.style.setProperty("--t", "1");
+        for (const f of p.stag || []) f.style.setProperty("--t", "1");
         p.focusIdx = -1;
       }
     }
@@ -42,14 +43,17 @@
     pn.lines = [...pn.el.querySelectorAll(".reveal span")];
     pn.focus = [...pn.el.querySelectorAll("[data-focus] > p")];
     pn.focusT = pn.focus.map(() => -1);
+    pn.stag = [...pn.el.querySelectorAll("[data-stagger] > *")];
+    pn.stagT = pn.stag.map(() => -1);
     pn.focusIdx = -1;
   }
   classifyPins(); // erneut, jetzt mit lines/focus bekannt (statische Pins bekommen alle Absaetze hell)
   // Hero-Headline in Zeichen zerlegen (Woerter bleiben unteilbar); jedes Zeichen bekommt einen Flugvektor Richtung Ring
   const heroH1 = document.querySelector("#hero .display");
-  if (heroH1 && !reduced) {
+  const seed = (n) => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+  // Text in Woerter (.w, unteilbar) und Zeichen (.ch) zerlegen; decorate(el, index) setzt die Per-Zeichen-Variablen
+  function splitChars(root, decorate) {
     let k = 0;
-    const seed = (n) => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
     const splitText = (node) => {
       const words = node.textContent.split(/(\s+)/);
       const frag = document.createDocumentFragment();
@@ -59,24 +63,38 @@
         const ws = document.createElement("span"); ws.className = "w";
         for (const chr of w) {
           const c = document.createElement("span"); c.className = "ch"; c.textContent = chr;
-          const r1 = seed(k), r2 = seed(k + 100), r3 = seed(k + 200); k++;
-          c.style.setProperty("--dx", `${(18 + r1 * 42).toFixed(1)}vw`);
-          c.style.setProperty("--dy", `${(-34 + r2 * 26).toFixed(1)}vh`);
-          c.style.setProperty("--rot", `${((r3 - 0.5) * 140).toFixed(0)}deg`);
-          c.style.setProperty("--dl", (r1 * 0.45).toFixed(3));
+          decorate(c, k++);
           ws.appendChild(c);
         }
         frag.appendChild(ws);
       }
       node.replaceWith(frag);
     };
-    for (const line of heroH1.querySelectorAll("span")) {
+    for (const line of root.querySelectorAll(":scope > span")) {
       for (const child of [...line.childNodes]) {
         if (child.nodeType === 3) splitText(child);
         else if (child.nodeType === 1) for (const t of [...child.childNodes]) if (t.nodeType === 3) splitText(t);
       }
     }
+    return k;
   }
+  if (heroH1 && !reduced) {
+    splitChars(heroH1, (c, k) => {
+      const r1 = seed(k), r2 = seed(k + 100), r3 = seed(k + 200);
+      c.style.setProperty("--dx", `${(18 + r1 * 42).toFixed(1)}vw`);
+      c.style.setProperty("--dy", `${(-34 + r2 * 26).toFixed(1)}vh`);
+      c.style.setProperty("--rot", `${((r3 - 0.5) * 140).toFixed(0)}deg`);
+      c.style.setProperty("--dl", (r1 * 0.45).toFixed(3));
+    });
+  }
+  // (5) Bridge: Zeichen brennen sich von links nach rechts ein (Verzoegerung = Position, leicht verrauscht)
+  const bridgeLine = document.querySelector("#bridge .scene-line");
+  if (bridgeLine && !reduced) {
+    const total = bridgeLine.textContent.replace(/\s+/g, "").length || 1;
+    splitChars(bridgeLine, (c, k) => c.style.setProperty("--dl", Math.min(0.68, (k / total) * 0.62 + seed(k + 300) * 0.06).toFixed(3)));
+  }
+  const bridgePin = pins.find((pn) => pn.section.id === "bridge");
+  let bridgeB = -1;
   const heroPin = pins.find((pn) => pn.section.id === "hero");
   let heroS = -1;
   // Statische Bloecke (Intelligence, Founders): Einfahrt-Fortschritt --v 0..1 aus der Viewport-Lage
@@ -207,6 +225,16 @@
         s.opacity = li.toFixed(3);
         s.transform = li < 0.999 ? `translateY(${((1 - li) * 0.4).toFixed(3)}em)` : "";
       }
+      // Stagger-Gruppen (Proof-Slots): Element i setzt sich zwischen p=0.05+i*0.07 und +0.18 zusammen
+      for (let i = 0; i < pn.stag.length; i++) {
+        const u = Math.min(1, Math.max(0, (p - 0.05 - i * 0.07) / 0.18));
+        const eu = u < 1 ? ease(u) : 1;
+        if (pn.stagT[i] !== eu) { pn.stag[i].style.setProperty("--t", eu.toFixed(3)); pn.stagT[i] = eu; }
+      }
+      if (pn === bridgePin && bridgeLine) {
+        const b = Math.min(1, inF * 1.15);
+        if (b !== bridgeB) { pn.el.style.setProperty("--b", b.toFixed(3)); bridgeB = b; }
+      }
       // Fokus-Liste: der aktive Absatz folgt dem Sektionsfortschritt zwischen 10% und 84%
       if (pn.focus.length) {
         const n = pn.focus.length;
@@ -238,6 +266,81 @@
   function progress() {
     const max = document.documentElement.scrollHeight - innerHeight;
     return max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+  }
+
+  // ── (1) Hero-Parallaxe: Maus (oder Gyro) bewegt Copy, Film-Ausschnitt und einen Glutschein; klingt mit dem Hero-Scroll ab ──
+  const glowEl = document.getElementById("cursorglow");
+  let px = 0, py = 0, mouseX = -1, mouseY = -1, heroVis = 1;
+  const heroEl = document.getElementById("hero");
+  function applyParallax() {
+    const r = heroEl ? heroEl.getBoundingClientRect() : null;
+    heroVis = r ? Math.min(1, Math.max(0, (r.bottom - innerHeight * 0.5) / (innerHeight * 0.9))) : 0;
+    const k = heroVis;
+    if (heroPin) { heroPin.el.style.setProperty("--px", (px * k).toFixed(3)); heroPin.el.style.setProperty("--py", (py * k).toFixed(3)); }
+    if (glowEl) {
+      const on = k > 0.02 && mouseX >= 0;
+      glowEl.style.opacity = on ? (k * 0.9).toFixed(3) : "0";
+      if (on) glowEl.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+    }
+  }
+  if (!reduced && matchMedia("(hover: hover)").matches) {
+    addEventListener("pointermove", (e) => {
+      mouseX = e.clientX; mouseY = e.clientY;
+      px = (e.clientX / innerWidth) * 2 - 1; py = (e.clientY / innerHeight) * 2 - 1;
+      applyParallax(); wakeFilm();
+    }, { passive: true });
+    addEventListener("pointerleave", () => { mouseX = -1; applyParallax(); });
+  } else if (!reduced && "DeviceOrientationEvent" in window) {
+    addEventListener("deviceorientation", (e) => {
+      if (e.gamma == null) return;
+      px = Math.max(-1, Math.min(1, e.gamma / 30)); py = Math.max(-1, Math.min(1, ((e.beta || 45) - 45) / 30));
+      applyParallax(); wakeFilm();
+    }, { passive: true });
+  }
+  let wakeFilm = () => {};
+
+  // ── (4) Funken: kleine 2D-Ebene, aktiv von der Formung bis zum Baum, Intensitaet folgt der Scrollgeschwindigkeit ──
+  const sparksEl = document.getElementById("sparks");
+  const sctx = sparksEl ? sparksEl.getContext("2d") : null;
+  const sparks = [];
+  let sw = 0, shh = 0, lastY = scrollY, lastT = performance.now(), vel = 0, sparksOn = false;
+  function sizeSparks() {
+    if (!sparksEl) return;
+    const d = Math.min(devicePixelRatio || 1, 1.5);
+    sw = sparksEl.width = Math.round(innerWidth * d); shh = sparksEl.height = Math.round(innerHeight * d);
+  }
+  sizeSparks(); addEventListener("resize", sizeSparks);
+  function spawnSpark(burst) {
+    sparks.push({ x: (0.25 + Math.random() * 0.5) * sw, y: shh * (0.55 + Math.random() * 0.4), vx: (Math.random() - 0.5) * 0.6, vy: -(0.6 + Math.random() * 1.6) * (burst ? 1.8 : 1),
+      r: 1.1 + Math.random() * 2.2, life: 1, decay: 0.005 + Math.random() * 0.011, hot: Math.random() < 0.3 });
+  }
+  function stepSparks(pf, dt) {
+    if (!sctx) return false;
+    const active = pf > 0.28 && pf < 0.92;
+    if (active !== sparksOn) { sparksOn = active; sparksEl.classList.toggle("on", active); }
+    if (!active) { if (sparks.length) { sparks.length = 0; sctx.clearRect(0, 0, sw, shh); } return false; }
+    const speed = Math.min(1, Math.abs(vel) / 2.5);
+    const want = 36 + Math.round(speed * 100);
+    for (let n = 0; n < 3 && sparks.length < want; n++) spawnSpark(speed > 0.5);
+    sctx.clearRect(0, 0, sw, shh);
+    sctx.globalCompositeOperation = "lighter";
+    const s = sw / 1440;
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const q = sparks[i];
+      q.x += (q.vx + Math.sin(q.life * 9) * 0.25) * s * dt; q.y += (q.vy - speed * 1.2) * s * dt; q.life -= q.decay * dt;
+      if (q.life <= 0 || q.y < -10) { sparks.splice(i, 1); continue; }
+      const a = Math.min(1, q.life * 1.6) * (0.55 + speed * 0.45);
+      sctx.fillStyle = q.hot ? `rgba(255,220,200,${a})` : `rgba(255,60,45,${a * 0.9})`;
+      sctx.beginPath(); sctx.arc(q.x, q.y, q.r * s * (0.6 + q.life * 0.6), 0, 6.283); sctx.fill();
+    }
+    sctx.globalCompositeOperation = "source-over";
+    return sparks.length > 0;
+  }
+  function measureVel() {
+    const now = performance.now(); const dt = Math.max(1, now - lastT);
+    const v = ((scrollY - lastY) / dt) * 16.7;   // px pro Frame
+    vel = vel * 0.8 + v * 0.2; lastY = scrollY; lastT = now;
+    return dt / 16.7;
   }
 
   // ── Reduced Motion: CSS-Poster bleibt, keine Frame-Engine, nur Copy ──
@@ -630,9 +733,11 @@
   }
 
   function drawImageCover(img, alpha) {
-    const s = Math.max(cw / img.width, ch / img.height);
+    const k = heroVis;                          // Parallaxe nur im Hero, klingt mit dem Scroll ab
+    const s = Math.max(cw / img.width, ch / img.height) * (1 + 0.035 * k);
+    const ox = -px * k * cw * 0.014, oy = -py * k * ch * 0.012;
     ctx.globalAlpha = alpha;
-    ctx.drawImage(img, (cw - img.width * s) / 2, (ch - img.height * s) / 2, img.width * s, img.height * s);
+    ctx.drawImage(img, (cw - img.width * s) / 2 + ox, (ch - img.height * s) / 2 + oy, img.width * s, img.height * s);
   }
 
   let firstDraw = false;
@@ -673,12 +778,16 @@
     choreograph();
     updateNodes(pf);
     updateThread();
+    applyParallax();
+    const dtf = measureVel();
+    const sparksAlive = stepSparks(pf, Math.min(3, dtf));
     if (fcountEl) fcountEl.textContent = `F ${pad(Math.round(current) + 1)} / ${pad(C.total)}`;
     pbar.style.transform = `scaleX(${p})`;
     if (dirty) { render(); dirty = false; }
-    if (settled && !dirty) { rafActive = false; return; }
+    if (settled && !dirty && !sparksAlive) { rafActive = false; return; }
     requestAnimationFrame(raf);
   }
+  wakeFilm = () => { dirty = true; wake(); };
 
   addEventListener("scroll", wake, { passive: true });
   pump();

@@ -19,10 +19,13 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='15' fill='none' stroke='%23e10600' stroke-width='4'/%3E%3C/svg%3E" />
   <link rel="preload" as="image" href="seq6/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
   <link rel="preload" as="image" href="seqp6/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
-  <link rel="stylesheet" href="style.css?v=34" />
+  <link rel="stylesheet" href="style.css?v=35" />
 </head>
 <body>
   <canvas id="film" aria-hidden="true"></canvas>
+  <!-- Funken-Ebene (Forging bis Baum): leichte 2D-Partikel, Intensitaet folgt der Scrollgeschwindigkeit -->
+  <canvas id="sparks" aria-hidden="true"></canvas>
+  <div class="cursorglow" id="cursorglow" aria-hidden="true"></div>
   <div class="shade" aria-hidden="true"></div>
   <div class="grain" id="grain" aria-hidden="true"></div>
 
@@ -82,18 +85,18 @@
           <h2 class="reveal"><span>Companies</span><span>and&nbsp;cases.</span></h2>
           <p class="body-copy">A name appears here once its ownership is documented and every partner wants it public. Until then, the work stays&nbsp;private.</p>
           <!-- DRAFT: anonymisierte Cases aus dem Kontext, keine Namen (D7). Founder liefern die echten drei. -->
-          <div class="slots">
-            <article class="slot">
+          <div class="slots" data-stagger>
+            <article class="slot" style="--shard:url(media/shard-1.webp)">
               <span class="idx">01 · EDUCATION</span>
               <h3>From a first offer to a full sales&nbsp;floor.</h3>
               <p>An education company taken from launch to its own media buying, setting and closing teams, run on the Circle's&nbsp;software.</p>
             </article>
-            <article class="slot">
+            <article class="slot" style="--shard:url(media/shard-3.webp)">
               <span class="idx">02 · REAL ESTATE</span>
               <h3>Development and investment at&nbsp;scale.</h3>
               <p>Real estate projects in the hundreds of millions, developed and financed by a Circle&nbsp;founder.</p>
             </article>
-            <article class="slot">
+            <article class="slot" style="--shard:url(media/shard-4.webp)">
               <span class="idx">03 · SAAS</span>
               <h3>Software built inside, used&nbsp;everywhere.</h3>
               <p>CirclOS for performance marketing and Arena for sales, built in-house and running in every company we&nbsp;hold.</p>
@@ -247,6 +250,6 @@
 
   </main>
 
-  <script src="main.js?v=34"></script>
+  <script src="main.js?v=35"></script>
 </body>
 </html>

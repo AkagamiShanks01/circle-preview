@@ -70,6 +70,12 @@ em.red { color: var(--red-soft); }
   font-size: var(--t3); line-height: 1.7; color: var(--mute);
 }
 
+/* Bridge: Zeichen brennen sich weissheiss ein und kuehlen auf Papier ab (JS setzt --b am Pin, Zeichen tragen --dl) */
+.scene-line .ch { display: inline-block; --bc: clamp(0, calc((var(--b, 1) - var(--dl, 0)) / 0.32), 1);
+  color: rgb(calc(244 + (1 - var(--bc)) * 11), calc(242 + (1 - var(--bc)) * 13), calc(238 + (1 - var(--bc)) * 17));
+  opacity: var(--bc);
+  text-shadow: 0 0 calc((1 - var(--bc)) * 22px) rgba(255, 90, 80, calc(1 - var(--bc))), 0 0 calc((1 - var(--bc)) * 60px) rgba(255, 42, 35, calc((1 - var(--bc)) * 0.8)); }
+.scene-line .w { display: inline-block; white-space: nowrap; }
 .scene-line {
   font-size: var(--t5s); line-height: 1.05; font-weight: 500;
   letter-spacing: -0.02em; text-wrap: balance;
@@ -86,6 +92,12 @@ em.red { color: var(--red-soft); }
   #film { background-image: url("seqp6/f0001.webp"); }
 }
 
+/* Funken-Ebene ueber dem Film, unter dem Scrim */
+#sparks { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; opacity: 0; transition: opacity var(--dur-2) var(--ease); }
+#sparks.on { opacity: 1; }
+/* (1) Glutschein, der der Maus im Hero folgt */
+.cursorglow { position: fixed; left: 0; top: 0; width: 42vmin; height: 42vmin; margin: -21vmin 0 0 -21vmin; border-radius: 50%; z-index: 2; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle, rgba(255,42,35,0.22) 0%, rgba(255,42,35,0.08) 40%, rgba(255,42,35,0) 70%); mix-blend-mode: screen; will-change: transform, opacity; }
 /* EIN durchgehender Lese-Scrim */
 .shade {
   position: fixed; inset: 0;
@@ -264,7 +276,7 @@ body.js-on .display .ch { will-change: transform, opacity; }
 body.js-on #hero .display > span { animation: rise var(--dur-3) var(--ease) both; }
 body.js-on #hero .display > span:nth-child(2) { animation-delay: 0.12s; }
 body.js-on #hero .display > span:nth-child(3) { animation-delay: 0.24s; }
-#hero .copy { max-width: 56em; }   /* drei Display-Zeilen ohne Umbruch */
+#hero .copy { max-width: 56em; transform: translate3d(calc(var(--px, 0) * -1.1vw), calc(var(--py, 0) * -0.9vh), 0); transition: transform 0.4s var(--ease); }   /* drei Display-Zeilen ohne Umbruch; Parallaxe zur Maus */
 body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 
 .sub { margin-top: var(--s3); max-width: 28em; }
@@ -356,7 +368,19 @@ body.js-on .focus-list p { will-change: transform, opacity; }
 
 /* Proof-Slots: drei Cases in Hairline-Rahmen (Visual Variant V3, wachsen mit den Companies) */
 .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2.5vw, 2rem); margin-top: var(--s3); }
-.slot { border: 1px solid var(--hairline); padding: clamp(1rem, 2vw, 1.6rem); background: rgba(5,5,5,0.35); display: flex; flex-direction: column; gap: var(--s1); }
+.slots { perspective: 1200px; perspective-origin: 50% 20%; }
+.slot { --t: 1; position: relative; border: 1px solid rgba(244,242,238, calc(0.10 * var(--t))); padding: clamp(1rem, 2vw, 1.6rem); background: rgba(5,5,5, calc(0.35 * var(--t))); display: flex; flex-direction: column; gap: var(--s1);
+  transform: translate3d(0, calc((1 - var(--t)) * 6vh), calc((1 - var(--t)) * -320px)) rotateX(calc((1 - var(--t)) * 16deg)); transform-origin: 50% 100%; opacity: clamp(0, calc(var(--t) * 2.5), 1); }
+body.js-on .slot { will-change: transform, opacity; }
+.slot .idx, .slot h3, .slot p { -webkit-mask-image: url("media/erode-mask.png"); mask-image: url("media/erode-mask.png"); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.slot .idx { -webkit-mask-position: calc(clamp(0, calc(var(--t) * 1.4), 1) * 100%) 0; mask-position: calc(clamp(0, calc(var(--t) * 1.4), 1) * 100%) 0; }
+.slot h3 { -webkit-mask-position: calc(clamp(0, calc(var(--t) * 1.4 - 0.2), 1) * 100%) 0; mask-position: calc(clamp(0, calc(var(--t) * 1.4 - 0.2), 1) * 100%) 0; }
+.slot p { -webkit-mask-position: calc(clamp(0, calc(var(--t) * 1.4 - 0.4), 1) * 100%) 0; mask-position: calc(clamp(0, calc(var(--t) * 1.4 - 0.4), 1) * 100%) 0; }
+/* Stein-Splitter fliegt beim Zusammensetzen durch den Slot und verglueht */
+.slot::before { content: ""; position: absolute; left: 10%; top: 10%; width: 60%; height: 50%; pointer-events: none; z-index: -1;
+  background: var(--shard) center / contain no-repeat; filter: drop-shadow(0 0 16px rgba(255,42,35,0.6));
+  opacity: calc((1 - var(--t)) * 1.2 * clamp(0, calc(var(--t) * 5), 1));
+  transform: translate3d(calc((1 - var(--t)) * -12vw), calc((1 - var(--t)) * 14vh), calc((1 - var(--t)) * 200px)) rotate(calc((1 - var(--t)) * -55deg)) scale(calc(0.8 + (1 - var(--t)) * 0.9)); }
 .slot .idx { color: var(--red-soft); }
 .slot h3 { font-size: clamp(1rem, 1.4vw, 1.2rem); font-weight: 500; letter-spacing: -0.01em; line-height: 1.3; }
 .slot p { max-width: none; }
@@ -471,7 +495,10 @@ body.js-on .pin { will-change: auto; }
   .pin.center { justify-content: center; }
   #hero .pin { justify-content: center; padding-bottom: 14vh; }
   .marginalia { display: none; }
-  .slots { grid-template-columns: 1fr; gap: var(--s1); margin-top: var(--s2); }
+  .slots { grid-template-columns: 1fr; gap: var(--s1); margin-top: var(--s2); perspective: none; }
+  .slot { transform: none; }
+  .cursorglow { display: none; }
+  #hero .copy { transform: none; transition: none; }
   .slot p { display: none; }               /* mobil nur Index + Titel, Text folgt auf der Case-Seite */
   .focus-list { margin-top: var(--s2); }
   .focus-list p { grid-template-columns: 1fr; gap: var(--s0); padding: 0.6em 0; }
@@ -539,6 +566,9 @@ body.js-on .pin { will-change: auto; }
   .focus-list p { color: var(--paper); --t: 1 !important; transform: none !important; }
   .focus-list p::before, .focus-list p::after { display: none; }
   .display .ch { transform: none !important; opacity: 1 !important; }
+  .slot { transform: none !important; opacity: 1 !important; --t: 1 !important; }
+  .scene-line .ch { opacity: 1 !important; text-shadow: none !important; color: var(--paper) !important; }
+  #sparks, .cursorglow { display: none !important; }
   .screen .frame, .founder, .portrait span { transform: none !important; opacity: 1 !important; }
   .portrait, .founder h3, .founder .lab, .founder .line, .founder .textlink, .screen figcaption { opacity: 1 !important; -webkit-mask-position: 100% 0 !important; mask-position: 100% 0 !important; }
   .pulse, .thread::after { animation: none !important; opacity: 0 !important; }
