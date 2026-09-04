@@ -293,6 +293,13 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 .body-copy { margin-top: var(--s2); max-width: 34em; text-shadow: 0 1px 14px rgba(5,5,5,0.9); }
 .body-copy + .body-copy { margin-top: var(--s1); }
 #contact .body-copy { max-width: 38em; }
+#contact { position: relative; }
+/* Ring zeichnet sich von oben im Uhrzeigersinn (conic-gradient bis --ring*360deg, radiale Maske laesst nur den Rand) */
+.ring-frame { position: absolute; inset: -18% -9% -18% -11%; pointer-events: none; z-index: -1; border-radius: 50%; }
+.ring-frame::before, .ring-frame::after { content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--red-soft) 0deg, var(--red-soft) calc(var(--ring, 1) * 360deg), transparent calc(var(--ring, 1) * 360deg + 0.5deg), transparent 360deg); }
+.ring-frame::after { -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px)); }
+.ring-frame::before { -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 6px), #000 100%); mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 6px), #000 100%); opacity: 0.35; filter: blur(3px); }
 
 /* Fokus-Liste (Sektoren): Tabelle mit Label-Spalte und Hairlines, eine Zeile hell, Fokus wandert mit dem Scroll */
 .focus-list { display: flex; flex-direction: column; margin-top: var(--s3); max-width: 44em; border-top: 1px solid var(--hairline); perspective: 1100px; perspective-origin: 85% 50%; }
@@ -369,13 +376,26 @@ body.js-on .focus-list p { will-change: transform, opacity; }
 .solid-inner { max-width: 74em; margin: 0; }
 .solid .body-copy { text-shadow: none; }
 
-/* Intelligence-Screens: drei Rahmen mit Caption (Platzhalter bis Produkt-Screens vorliegen) */
-.screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 3rem); margin-top: var(--s4); }
-.screen { margin: 0; }
+/* Intelligence-Screens: drei Glasplatten, fahren beim Scroll aus der Tiefe ein (--v vom Block), kippen zur Maus (--mx/--my) */
+.screens { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem, 3vw, 3rem); margin-top: var(--s4); perspective: 1400px; --mx: 0; --my: 0; }
+.screen { margin: 0; --i: 0; --sv: clamp(0, calc(var(--v, 1) * 1.45 - var(--i) * 0.15), 1); }
+.screen:nth-child(2) { --i: 1; } .screen:nth-child(3) { --i: 2; }
 .screen .frame {
-  aspect-ratio: 16 / 10; border: 1px solid rgba(244, 242, 238, 0.14); background: #0a0a0a;
+  aspect-ratio: 16 / 10; border: 1px solid rgba(244, 242, 238, 0.14); background: linear-gradient(160deg, #0e0e0e, #060606);
   display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+  transform: translate3d(0, calc((1 - var(--sv)) * 10vh), calc((1 - var(--sv)) * -260px)) rotateX(calc((1 - var(--sv)) * 22deg + var(--my) * -5deg)) rotateY(calc(var(--mx) * 7deg));
+  opacity: var(--sv); transition: transform 0.25s var(--ease);
+  box-shadow: 0 40px 70px -40px rgba(0,0,0,0.95), inset 0 0 0 1px rgba(244,242,238,0.04);
 }
+body.js-on .screen .frame { will-change: transform, opacity; }
+/* Glas: wandernder Lichtstreif + roter Reflex des Films, folgen der Maus */
+.screen .frame::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0) 32%, rgba(255,255,255,0.085) 46%, rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse at calc(50% + var(--mx) * 45%) calc(50% + var(--my) * 45%), rgba(255,42,35,0.26), rgba(255,42,35,0) 62%);
+  background-size: 260% 100%, 100% 100%; background-repeat: no-repeat;
+  background-position: calc(50% + var(--mx) * -60%) 0, 0 0; }
+.screen figcaption { opacity: var(--sv); transform: translateY(calc((1 - var(--sv)) * 1.2em)); }
 .screen .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .screen .frame span { color: var(--faint); }
 .screen figcaption { margin-top: var(--s1); max-width: 26em; }
@@ -388,11 +408,22 @@ body.js-on .focus-list p { will-change: transform, opacity; }
   gap: var(--s3) clamp(1.5rem, 3vw, 3rem);
 }
 .founder { display: flex; flex-direction: column; align-items: flex-start; }
+.founder { --i: 0; --pv: clamp(0, calc(var(--v, 1) * 1.45 - var(--i) * 0.15), 1); transform: translateY(calc((1 - var(--pv)) * 3vh)); }
+.founder:nth-child(2) { --i: 1; } .founder:nth-child(3) { --i: 2; }
+/* (9) Portrait wird wie Marmor freigelegt: Erosionsmaske wandert, Rauschen verglueht */
 .portrait {
   aspect-ratio: 3 / 4; width: 100%; max-width: 220px; margin-bottom: var(--s1);
   border: 1px solid rgba(244, 242, 238, 0.14); background: #0a0a0a;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;
+  -webkit-mask-image: url("media/erode-mask.png"); mask-image: url("media/erode-mask.png");
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: calc(var(--pv) * 100%) 0; mask-position: calc(var(--pv) * 100%) 0;
 }
+.portrait::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: calc((1 - var(--pv)) * 0.9 + 0.06);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 140px 140px; mix-blend-mode: screen; }
+.portrait span { position: relative; z-index: 1; transform: scale(calc(0.88 + var(--pv) * 0.12)); opacity: var(--pv); }
+.founder h3, .founder .lab, .founder .line, .founder .textlink { opacity: var(--pv); }
 .portrait span { font-family: "Instrument Serif", serif; font-style: italic; font-size: 2.4rem; color: var(--faint); }
 .founder h3 { font-size: clamp(1.05rem, 1.4vw, 1.25rem); font-weight: 500; letter-spacing: -0.01em; margin-bottom: var(--s0); }
 .founder .lab { color: var(--mute); margin-bottom: var(--s1); }
@@ -482,6 +513,8 @@ body.js-on .pin { will-change: auto; }
   .kicker::after { display: none; }
   #focus { height: 240vh; }
   .screens { grid-template-columns: 1fr; gap: var(--s2); }
+  .screen .frame { transform: none; transition: none; }
+  .ring-frame { display: none; }
   .founders { grid-template-columns: 1fr; }
   .portrait { max-width: 160px; }
   .solid.seam { margin-top: 12vh; margin-bottom: 12vh; }
@@ -506,6 +539,8 @@ body.js-on .pin { will-change: auto; }
   .focus-list p { color: var(--paper); --t: 1 !important; transform: none !important; }
   .focus-list p::before, .focus-list p::after { display: none; }
   .display .ch { transform: none !important; opacity: 1 !important; }
+  .screen .frame, .founder, .portrait span { transform: none !important; opacity: 1 !important; }
+  .portrait, .founder h3, .founder .lab, .founder .line, .founder .textlink, .screen figcaption { opacity: 1 !important; -webkit-mask-position: 100% 0 !important; mask-position: 100% 0 !important; }
   .pulse, .thread::after { animation: none !important; opacity: 0 !important; }
   #hero .display > span, #hero .sub { animation: none !important; }
 }

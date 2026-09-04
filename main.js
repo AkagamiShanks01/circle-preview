@@ -79,6 +79,18 @@
   }
   const heroPin = pins.find((pn) => pn.section.id === "hero");
   let heroS = -1;
+  // Statische Bloecke (Intelligence, Founders): Einfahrt-Fortschritt --v 0..1 aus der Viewport-Lage
+  const solids = [...document.querySelectorAll(".screen, .founder")].map((el) => ({ el, v: -1 }));
+  // Glasplatten kippen zur Maus
+  const screensEl = document.querySelector(".screens");
+  if (screensEl && matchMedia("(hover: hover)").matches) {
+    screensEl.addEventListener("pointermove", (e) => {
+      const r = screensEl.getBoundingClientRect();
+      screensEl.style.setProperty("--mx", (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3));
+      screensEl.style.setProperty("--my", (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3));
+    });
+    screensEl.addEventListener("pointerleave", () => { screensEl.style.setProperty("--mx", "0"); screensEl.style.setProperty("--my", "0"); });
+  }
   const grainEl = document.getElementById("grain");
 
   // ── Baum-Knoten + Faden: Alex' Struktur entfaltet sich aus dem Lichtpfad ──
@@ -180,6 +192,7 @@
       // Ast-Kicker: Seitenast waechst mit der Einblendung
       if (pn.section.classList.contains("branch")) pn.el.style.setProperty("--k", inF.toFixed(3));
       // Hero: Headline zerfaellt zwischen 12% und 62% des Hero-Scrolls
+      if (pn.section.id === "close") pn.el.style.setProperty("--ring", Math.min(1, inF * 0.5 + p * 1.3).toFixed(3));
       if (pn === heroPin && heroH1) {
         const sh = ease((p - 0.12) / 0.5);
         if (sh !== heroS) { heroH1.style.setProperty("--s", sh.toFixed(3)); heroS = sh; }
@@ -211,6 +224,11 @@
           pn.focusIdx = idx;
         }
       }
+    }
+    for (const sb of solids) {
+      const r = sb.el.getBoundingClientRect();
+      const v = ease((innerHeight * 0.96 - r.top) / (innerHeight * 0.36));
+      if (v !== sb.v) { sb.el.style.setProperty("--v", v.toFixed(3)); sb.v = v; }
     }
     if (grainEl) grainEl.style.backgroundPosition = `0 ${(-(scrollY * 0.3) % 300).toFixed(1)}px`;
   }
