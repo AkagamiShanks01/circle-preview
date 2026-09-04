@@ -24,9 +24,9 @@
   --t2: 0.75rem;                                  /* Small-Label: Founder-Disziplin */
   --t3: clamp(0.95rem, 1.15vw, 1.06rem);          /* Body */
   --t4: clamp(1rem, 1.5vw, 1.2rem);               /* Team-Line */
-  --t5h: clamp(1.6rem, 3vw, 2.8rem);              /* H2: Pillars, Founders, Contact */
-  --t5s: clamp(1.9rem, 4vw, 4rem);                /* Scene-Line: Bridge */
-  --t5d: clamp(2.7rem, 7vw, 7rem);                /* Display: nur Hero */
+  --t5h: clamp(1.45rem, 2.4vw, 2.3rem);           /* H2: Pillars, Founders, Contact (OOAK-Mass: ruhig, max 22ch) */
+  --t5s: clamp(1.7rem, 3.2vw, 3.2rem);            /* Scene-Line: Bridge */
+  --t5d: clamp(2.6rem, 6vw, 6rem);                /* Display: nur Hero */
 
   /* Zeit */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -189,27 +189,36 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 }
 
 /* ── Pillars (H2-Tier) ─────────────────── */
-.kicker { color: var(--red-soft); margin-bottom: var(--s1); display: block; }
+/* Kicker traegt die Sektionsnummer: Struktur auf den ersten Blick (01 · FOCUS) */
+.kicker { color: var(--red-soft); margin-bottom: var(--s2); display: flex; align-items: baseline; gap: 1.2em; }
+.kicker::before { content: attr(data-n); color: var(--faint); font-variant-numeric: tabular-nums; letter-spacing: 0.2em; }
+.kicker::after { content: ""; flex: 0 0 3rem; height: 1px; background: var(--hairline); align-self: center; }
 .pillar h2, .solid h2 {
-  font-size: var(--t5h); line-height: 1.15; font-weight: 500;
-  letter-spacing: -0.02em; text-wrap: balance;
+  font-size: var(--t5h); line-height: 1.18; font-weight: 500;
+  letter-spacing: -0.015em; text-wrap: balance; max-width: 22ch;
 }
 .body-copy { margin-top: var(--s2); max-width: 34em; text-shadow: 0 1px 14px rgba(5,5,5,0.9); }
 .body-copy + .body-copy { margin-top: var(--s1); }
 #contact .body-copy { max-width: 38em; }
 
-/* Fokus-Liste (Sektoren): ein Absatz hell, die anderen gedimmt, Fokus wandert mit dem Scroll */
-.focus-list { display: flex; flex-direction: column; gap: var(--s1); margin-top: var(--s3); max-width: 40em; }
-.focus-list p { color: var(--faint); transition: color var(--dur-2) var(--ease); }
-.focus-list p.on { color: var(--paper); }
-.focus-list p b { font-weight: 500; color: inherit; }
+/* Fokus-Liste (Sektoren): Tabelle mit Label-Spalte und Hairlines, eine Zeile hell, Fokus wandert mit dem Scroll */
+.focus-list { display: flex; flex-direction: column; margin-top: var(--s3); max-width: 44em; border-top: 1px solid var(--hairline); }
+.focus-list p {
+  display: grid; grid-template-columns: 9.5em 1fr; gap: var(--s2); align-items: baseline;
+  padding: 0.85em 0; border-bottom: 1px solid var(--hairline);
+  color: var(--faint); transition: color var(--dur-2) var(--ease);
+}
+.focus-list p.on { color: var(--mute); }
+.focus-list p b { font-weight: 500; color: var(--faint); font-size: var(--t2); letter-spacing: 0.3em; text-transform: uppercase; transition: color var(--dur-2) var(--ease); }
+.focus-list p.on b { color: var(--paper); }
+.focus-list p .d { font-size: var(--t3); line-height: 1.6; max-width: 30em; }
 
 /* Team-Line: eine Zeile, drei Namen, Mitte-Punkte */
 .team-line {
   display: flex; flex-wrap: wrap; align-items: baseline;
   gap: clamp(0.8rem, 2vw, 1.6rem);
   margin-top: var(--s2);
-  font-size: clamp(0.8rem, 1.05vw, 1rem); letter-spacing: 0.3em; font-weight: 500; color: var(--paper);
+  font-size: clamp(0.72rem, 0.9vw, 0.86rem); letter-spacing: 0.24em; font-weight: 500; color: var(--paper);
 }
 .team-line i { color: var(--faint); font-style: normal; letter-spacing: 0; }
 
@@ -308,8 +317,10 @@ body.js-on .pin { will-change: auto; }
   .marginalia { display: none; }
   .slots { grid-template-columns: 1fr; gap: var(--s1); margin-top: var(--s2); }
   .slot p { display: none; }               /* mobil nur Index + Titel, Text folgt auf der Case-Seite */
-  .focus-list { gap: var(--s0); margin-top: var(--s2); }
+  .focus-list { margin-top: var(--s2); }
+  .focus-list p { grid-template-columns: 1fr; gap: var(--s0); padding: 0.6em 0; }
   .focus-list p:not(.on) .d { display: none; }   /* mobil: nur der aktive Sektor zeigt seine Zeile */
+  .kicker::after { display: none; }
   #focus { height: 240vh; }
   .screens { grid-template-columns: 1fr; gap: var(--s2); }
   .founders { grid-template-columns: 1fr; }
