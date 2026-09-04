@@ -44,6 +44,66 @@
   }
   classifyPins(); // erneut, jetzt mit lines/focus bekannt (statische Pins bekommen alle Absaetze hell)
   const grainEl = document.getElementById("grain");
+
+  // ── Baum-Knoten + Faden: Alex' Struktur entfaltet sich aus dem Lichtpfad ──
+  const nodesEl = document.getElementById("nodes");
+  const nodeEls = [...document.querySelectorAll(".node")];
+  const threadEl = document.getElementById("thread");
+  const teamEl = document.getElementById("team");
+  const mmEl = document.getElementById("masterminds");
+  // Knoten liegen im 16:9-Frame (normiert); Cover-Geometrie des Canvas auf den Viewport umrechnen
+  function placeNodes() {
+    if (!nodeEls.length || innerWidth <= 720) return;
+    const vw = innerWidth, vh = innerHeight;
+    const s = Math.max(vw / 1920, vh / 1080);
+    const dx = (vw - 1920 * s) / 2, dy = (vh - 1080 * s) / 2;
+    for (const n of nodeEls) {
+      n.style.left = `${(dx + parseFloat(n.dataset.x) * 1920 * s).toFixed(1)}px`;
+      n.style.top = `${(dy + parseFloat(n.dataset.y) * 1080 * s).toFixed(1)}px`;
+    }
+  }
+  placeNodes();
+  // Film-Mapping mit Haltestelle (aus dem DOM gemessen):
+  //   0 .. treeholdEnd-HOLD  -> Frames 0 .. TREE_FRAC (der Baum steht)
+  //   treeholdEnd-HOLD .. treeholdEnd -> Halt auf dem Baum (die Knoten tragen Alex' Struktur)
+  //   treeholdEnd .. eduEnd -> Rest des Films (Pull-back), danach haelt das Schlussbild
+  const TREE_FRAC = 705 / 816;   // Frame, an dem der Baum vollstaendig steht (Segment-B-Ende)
+  const treeholdEl = document.getElementById("treehold");
+  const eduEl = document.getElementById("edu");
+  let FM = { a: 1, b: 1, c: 1 };
+  function measureFilmMap() {
+    const y = scrollY;
+    const hold = innerHeight * 0.6;
+    const tEnd = treeholdEl ? treeholdEl.getBoundingClientRect().bottom + y - innerHeight : Infinity;
+    const eEnd = eduEl ? eduEl.getBoundingClientRect().bottom + y - innerHeight : tEnd + 1;
+    FM = { a: Math.max(1, tEnd - hold), b: Math.max(1, tEnd), c: Math.max(tEnd + 1, eEnd - innerHeight * 0.4) };
+  }
+  measureFilmMap();
+  function filmFrac(y) {
+    if (!treeholdEl) return Math.min(1, y / Math.max(1, document.documentElement.scrollHeight - innerHeight) / FILM_END);
+    if (y <= FM.a) return TREE_FRAC * (y / FM.a);
+    if (y <= FM.b) return TREE_FRAC;
+    return Math.min(1, TREE_FRAC + (1 - TREE_FRAC) * ((y - FM.b) / Math.max(1, FM.c - FM.b)));
+  }
+  // Knoten sichtbar waehrend der Haltestelle, weg sobald die Team-Copy einblendet
+  function updateNodes(pf) {
+    if (!nodesEl || !teamEl) return;
+    const g = ease((pf - (TREE_FRAC - 0.03)) / 0.03);
+    const r = teamEl.getBoundingClientRect();
+    const teamIn = r.top < innerHeight * 0.55 ? ease(1 - Math.max(0, r.top) / (innerHeight * 0.55)) : 0;
+    nodesEl.style.opacity = (g * (1 - teamIn)).toFixed(3);
+  }
+  // Faden: waechst von oben durch die Ast-Sektionen (Team bis Masterminds) mit dem Scroll
+  function updateThread() {
+    if (!threadEl || !teamEl || !mmEl) return;
+    const a = teamEl.getBoundingClientRect(), b = mmEl.getBoundingClientRect();
+    const on = a.top < innerHeight * 0.55 && b.bottom > innerHeight * 0.3;
+    threadEl.classList.toggle("on", on);
+    if (on) {
+      const prog = Math.min(1, Math.max(0, (innerHeight * 0.55 - a.top) / Math.max(1, b.bottom - a.top)));
+      threadEl.style.transform = `scaleY(${prog.toFixed(3)})`;
+    }
+  }
   function choreograph() {
     // Erst alle Layout-Reads, dann alle Style-Writes (kein Thrashing)
     const reads = [];
@@ -56,7 +116,8 @@
       const span = Math.max(1, r.height - innerHeight);
       const p = Math.min(1, Math.max(0, -r.top / span));
       const inF = r.top > 0 ? ease(1 - r.top / (innerHeight * 0.55)) : 1;
-      const outF = pn.section === lastSection ? 1 : 1 - ease((p - 0.84) / 0.10);
+      // letzte Szene und Baum-Haltestelle blenden nie aus (Knoten stehen bis Team einblendet)
+      const outF = (pn.section === lastSection || pn.section.id === "treehold") ? 1 : 1 - ease((p - 0.84) / 0.10);
       const o = Math.min(inF, outF);
       pn.el.style.opacity = o.toFixed(3);
       // Copy driftet 2vh langsamer als der Scroll (dritte Ebene neben Film und Grain)
@@ -92,9 +153,10 @@
 
   // ── Reduced Motion: CSS-Poster bleibt, keine Frame-Engine, nur Copy ──
   if (reduced) {
-    const tick = () => { choreograph(); pbar.style.transform = `scaleX(${progress()})`; };
+    if (nodesEl) nodesEl.style.opacity = "1";
+    const tick = () => { choreograph(); updateThread(); pbar.style.transform = `scaleX(${progress()})`; };
     addEventListener("scroll", tick, { passive: true });
-    addEventListener("resize", () => { classifyPins(); tick(); });
+    addEventListener("resize", () => { classifyPins(); placeNodes(); tick(); });
     tick();
     return;
   }
@@ -111,31 +173,31 @@
     const portrait = portraitMQ.matches;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const small = innerWidth * dpr <= 1024;
-    const total = (portrait || small) ? 817 : 1225;   // seq6-Sets (Master v2, 40.8s, Baum-Sequenz)
+    const total = 817;   // seq7/seqp6/seqm7: jeder 3. Frame des 4K60-Masters v2 (40.8s), alle Tiers gleich indiziert
     // Fine-Ebene nur so gross dekodieren, wie das Canvas wirklich zeichnet
     // (Frames 16:9 bzw. 9:16, cover-geskalattet) — schont Decode/Budget und
     // eliminiert Eviction-Churn, ohne jemals weicher als nativ zu sein.
     const vw = Math.round(innerWidth * dpr), vh = Math.round(innerHeight * dpr);
     const fineWidth = portrait
       ? Math.max(720, Math.min(1080, Math.ceil(Math.max(vw, vh * 0.5625))))
-      : Math.max(960, Math.min(2560, Math.ceil(Math.max(vw, (vh * 16) / 9))));
+      : Math.max(960, Math.min(1920, Math.ceil(Math.max(vw, (vh * 16) / 9))));
     return {
       portrait, small,
-      dir: portrait ? "seqp6" : (small ? "seqm6" : "seq6"),
+      dir: portrait ? "seqp6" : (small ? "seqm7" : "seq7"),
       total,
       start: portrait ? 14 : 0,  // Mobil startet der Film mit sichtbarem Ring statt Void
       end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
-      window: (portrait || small) ? 14 : 40,
+      window: (portrait || small) ? 16 : 48,
       coarseStep: (portrait || small) ? 24 : 16,
       coarseWidth: (portrait || small) ? 540 : 1024,  // Coarse klein dekodieren (Byte-Fix)
       fineWidth,
-      byteCap: (portrait || small) ? 140e6 : 320e6,   // hartes Dekodier-Byte-Limit (420 -> 320: Renderer-Crash-Fix 2026-09-04)
+      byteCap: (portrait || small) ? 160e6 : 600e6,   // 1080p-Frames sind halb so gross wie 2560er, Fenster darf breiter sein
     };
   }
   let C = makeConfig();
-  const FILM_END = 0.86;    // Anteil des Scrolls, an dem der Film sein letztes Bild erreicht
-  const MAX_INFLIGHT = 10;
-  const COARSE_MIN = 2;     // echte Mindestparallelitaet der Basis-Ebene
+  const FILM_END = 0.755;    // Anteil des Scrolls, an dem der Film sein letztes Bild erreicht
+  const MAX_INFLIGHT = 12;
+  const COARSE_MIN = 0;     // Basis-Ebene kommt jetzt aus seqc7 (Sofort-Set), keine Coarse-Requests auf das Fine-Set
   const MAX_RETRY = 2;
 
   const pad = (n) => String(n).padStart(4, "0");
@@ -193,18 +255,18 @@
     return resizeWidth ? decodeScaled(blob, resizeWidth, quality) : createImageBitmap(blob);
   }
 
-  // Standin-Ebene (nur Desktop): das kleine seqm6-Set (~17MB) als Sofort-Film,
-  // waehrend das scharfe seq6-Set still nachlaedt.
+  // Standin-Ebene (nur Desktop): seqm7 (960px, ~12MB), 1:1 zum Fine-Set indiziert,
+  // waehrend das scharfe seq7-Set (1920px) still nachlaedt.
   const STANDIN_TOTAL = 817;
   const useStandin = !C.portrait && !C.small;
-  const standinBlobs = new Map();   // j -> Blob (seqm6)
+  const standinBlobs = new Map();   // j -> Blob (seqm7)
   const standin = new Map();        // j -> ImageBitmap
   const standinPending = new Set();
   const toStandin = (i) => Math.round(i * (STANDIN_TOTAL - 1) / (C.total - 1));
   async function getStandinBlob(j) {
     const c = standinBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqm6/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqm7/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`m${j}`);
     const blob = await r.blob();
     standinBlobs.set(j, blob);
@@ -224,7 +286,7 @@
         const blob = standinBlobs.get(k);
         if (!blob) continue;
         standinPending.add(k);
-        decodeScaled(blob, 1280)
+        decodeScaled(blob, 960)
           .then((bm) => { standin.set(k, bm); dirty = true; wake(); })
           .catch(() => {})
           .finally(() => standinPending.delete(k));
@@ -232,7 +294,7 @@
     }
     // Fenster klein halten (24 statt 90: 90 x 1600px-Bitmaps ~ 500MB liessen den
     // Renderer bei ~70% Scroll abstuerzen, gemessen 2026-09-04 headless Chromium)
-    if (standin.size > 24) {
+    if (standin.size > 40) {
       let worst = -1, wd = -1;
       for (const k of standin.keys()) { const d = Math.abs(k - j); if (d > wd) { wd = d; worst = k; } }
       standin.get(worst)?.close?.(); standin.delete(worst);
@@ -240,14 +302,62 @@
     return null;
   }
 
-  // Zweistufiger Voll-Preload: Phase 1 = Standin-Blobs (schnell nutzbar),
-  // Phase 2 = scharfes Zielset. Hohe Parallelitaet gegen die Tunnel-Latenz.
-  let warmInflight = 0, warmNext = 0, warmEpoch = epoch, warmPhase = useStandin ? 1 : 2;
-  const WARM_PAR = 10;
+  // Sofort-Set (alle Formfaktoren): seqc7 = jeder 2. Frame des Sets in 480px (~1MB gesamt).
+  // Wird zuerst komplett geladen, damit der Scrub nach <1s ueberall greift; Dekodierung nah am Ziel.
+  const COARSE_TOTAL = 409;
+  const coarseBlobs = new Map();    // j -> Blob (seqc7)
+  const coarsePending = new Set();
+  const toCoarse = (i) => Math.min(COARSE_TOTAL - 1, Math.floor(i / 2));
+  async function getCoarseBlob(j) {
+    const c = coarseBlobs.get(j);
+    if (c) return c;
+    const r = await fetch(`seqc7/f${pad(j + 1)}.webp`);
+    if (!r.ok) throw new Error(`c${j}`);
+    const blob = await r.blob();
+    coarseBlobs.set(j, blob);
+    return blob;
+  }
+  function coarseAt(i) {
+    const j = toCoarse(i);
+    for (let d = 0; d <= 3; d++) {
+      const a = coarse.get(j - d); if (a) return a;
+      const b = coarse.get(j + d); if (b) return b;
+    }
+    for (let d = 0; d <= 3; d++) {
+      for (const k of [j + d, j - d]) {
+        if (k < 0 || k >= COARSE_TOTAL || coarse.has(k) || coarsePending.has(k)) continue;
+        const blob = coarseBlobs.get(k);
+        if (!blob) continue;
+        coarsePending.add(k);
+        createImageBitmap(blob)
+          .then((bm) => { coarse.set(k, bm); coarseBytes += entryBytes(bm); dirty = true; wake(); })
+          .catch(() => {})
+          .finally(() => coarsePending.delete(k));
+      }
+    }
+    if (coarse.size > 60) {
+      let worst = -1, wd = -1;
+      for (const k of coarse.keys()) { const d = Math.abs(k - j); if (d > wd) { wd = d; worst = k; } }
+      const bm = coarse.get(worst); coarseBytes -= entryBytes(bm); bm?.close?.(); coarse.delete(worst);
+    }
+    return null;
+  }
+
+  // Dreistufiger Voll-Preload: Phase 0 = Sofort-Set (seqc7, ~1MB), Phase 1 = Standin-Blobs
+  // (seqm7, Desktop), Phase 2 = scharfes Zielset. Hohe Parallelitaet gegen Latenz.
+  let warmInflight = 0, warmNext = 0, warmEpoch = epoch, warmPhase = 0;
+  const WARM_PAR = 12;
   function warm() {
-    if (warmEpoch !== epoch) { warmNext = 0; warmEpoch = epoch; warmPhase = (!C.portrait && !C.small) ? 1 : 2; }
+    if (warmEpoch !== epoch) { warmNext = 0; warmEpoch = epoch; warmPhase = 0; }
     while (warmInflight < WARM_PAR) {
-      if (warmPhase === 1) {
+      if (warmPhase === 0) {
+        if (warmNext >= COARSE_TOTAL) { warmPhase = useStandin ? 1 : 2; warmNext = 0; continue; }
+        const j = warmNext++;
+        if (coarseBlobs.has(j)) continue;
+        warmInflight++;
+        getCoarseBlob(j).catch(() => {})
+          .finally(() => { warmInflight--; updateLoader(); dirty = true; wake(); warm(); });
+      } else if (warmPhase === 1) {
         if (warmNext >= STANDIN_TOTAL) { warmPhase = 2; warmNext = 0; continue; }
         const j = warmNext++;
         if (standinBlobs.has(j)) continue;
@@ -337,7 +447,7 @@
   }
 
   function clearAll() {
-    blobs.clear(); standinBlobs.clear();
+    blobs.clear(); standinBlobs.clear();   // coarseBlobs bleiben: seqc7 ist formatunabhaengig
     for (const [, bm] of standin) bm.close?.();
     standin.clear();
     for (const [, p] of pending) p.ctrl.abort();
@@ -352,8 +462,8 @@
   let loaderDone = false, loaderStart = performance.now();
   function updateLoader() {
     if (loaderDone) return;
-    const phase1Total = useStandin ? STANDIN_TOTAL : C.end + 1;
-    const have = useStandin ? standinBlobs.size : Math.min(blobs.size, C.end + 1);
+    const phase1Total = COARSE_TOTAL;
+    const have = Math.min(coarseBlobs.size, COARSE_TOTAL);
     if (have >= phase1Total) {
       loaderDone = true;
       document.getElementById("loader")?.remove();
@@ -395,7 +505,7 @@
       clearAll();
       C = next;
       loaderDone = false; loaderStart = performance.now();
-      current = targetFrame = Math.round(Math.min(1, progress() / FILM_END) * C.end);
+      current = targetFrame = Math.round(filmFrac(scrollY) * C.end);
     } else {
       // Nur Aufloesungs-Drift: Bitmaps neu dekodieren, Blob-Cache bleibt warm
       C.fineWidth = next.fineWidth;
@@ -409,7 +519,7 @@
   }
   function onViewportChange() {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { resize(); classifyPins(); reinitIfConfigChanged(); wake(); }, 150);
+    resizeTimer = setTimeout(() => { resize(); classifyPins(); placeNodes(); measureFilmMap(); reinitIfConfigChanged(); wake(); }, 150);
   }
   addEventListener("resize", onViewportChange);
   portraitMQ.addEventListener?.("change", onViewportChange);
@@ -427,12 +537,7 @@
     }
     const st = standinAt(i);
     if (st) return st;
-    let best = null, bd = Infinity;
-    for (const k of coarse.keys()) {
-      const d = Math.abs(k - i);
-      if (d < bd) { bd = d; best = k; }
-    }
-    return best !== null ? coarse.get(best) : null;
+    return coarseAt(i);
   }
 
   function drawImageCover(img, alpha) {
@@ -465,8 +570,8 @@
   }
   function raf() {
     const p = progress();
-    // Film endet bei FILM_END des Scrolls und haelt das Schlussbild unter Founders/Contact
-    const pf = Math.min(1, p / FILM_END);
+    // Film-Mapping mit Haltestelle (siehe filmFrac); Schlussbild haelt unter Founders/Contact
+    const pf = filmFrac(scrollY);
     const target = C.start + pf * (C.end - C.start);
     targetFrame = Math.round(target);
     const settled = Math.abs(target - current) <= 0.002;
@@ -477,6 +582,8 @@
       dirty = true;
     }
     choreograph();
+    updateNodes(pf);
+    updateThread();
     if (fcountEl) fcountEl.textContent = `F ${pad(Math.round(current) + 1)} / ${pad(C.total)}`;
     pbar.style.transform = `scaleX(${p})`;
     if (dirty) { render(); dirty = false; }

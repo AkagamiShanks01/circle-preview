@@ -80,7 +80,7 @@ em.red { color: var(--red-soft); }
   position: fixed; inset: 0;
   width: 100vw; height: 100vh; height: 100svh;
   z-index: 0;
-  background: var(--black) url("seq6/f0001.webp") center / cover no-repeat;
+  background: var(--black) url("seq7/f0001.webp") center / cover no-repeat;
 }
 @media (orientation: portrait) {
   #film { background-image: url("seqp6/f0001.webp"); }
@@ -141,15 +141,47 @@ em.red { color: var(--red-soft); }
 #focus       { height: 240vh; }   /* laenger: fuenf Fokus-Zeilen wandern */
 #proof       { height: 170vh; }
 #forging     { height: 240vh; }   /* Film allein: die Statue entsteht */
-#bridge      { height: 200vh; }
-#team        { height: 190vh; }
+#bridge      { height: 190vh; }   /* vollendete Bueste */
+#hand        { height: 120vh; }   /* Film allein: die Hand streckt sich aus */
+#treehold    { height: 330vh; }   /* die Pfade wachsen; die letzten 60vh haelt der Film auf dem Baum, die Knoten tragen Alex' Struktur */
+#team        { height: 170vh; }
 #edu         { height: 170vh; }
-#treehold    { height: 230vh; }   /* Film allein: der fertige Baum steht, dann Pull-back */
 #masterminds { height: 150vh; }
 #close       { height: 170vh; }
 .film-only .pin { padding: 0; }
-/* Team/Edu: Copy oben links, weil der Baum die untere Bildhaelfte fuellt */
-.pin.top { justify-content: flex-start; padding-top: calc(var(--navh) + 6vh); }
+
+/* Knoten-Labels auf dem Baum: JS positioniert sie ueber die Cover-Geometrie des Films */
+.nodes-pin { padding: 0; justify-content: flex-end; }
+.nodes { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.node {
+  position: absolute; transform: translate(-50%, -100%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+  color: var(--paper); text-decoration: none; pointer-events: auto;
+  padding-bottom: 2.4rem;   /* Platz fuer Stiel + Ring */
+}
+.node i { position: absolute; bottom: 0.45rem; width: 1px; height: 1.9rem; background: linear-gradient(to bottom, rgba(244,242,238,0.9), rgba(255,42,35,0.9)); }
+.node::after { content: ""; position: absolute; bottom: -0.1rem; width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 1px solid var(--red-soft); box-shadow: 0 0 10px rgba(255,42,35,0.7); }
+.node span { font-size: var(--t0); letter-spacing: 0.3em; color: var(--faint); font-variant-numeric: tabular-nums; }
+.node b { font-size: var(--t1); letter-spacing: 0.4em; text-transform: uppercase; font-weight: 500; white-space: nowrap; text-shadow: 0 1px 12px rgba(5,5,5,0.9); }
+
+/* Der Faden: fixe Linie an der Kicker-Kante, waechst mit dem Scroll durch die Ast-Sektionen */
+.thread {
+  position: fixed; top: 0; bottom: 0; width: 1px; z-index: 4; pointer-events: none;
+  left: calc(clamp(1.5rem, 6vw, 7rem) + 0.28rem);
+  background: linear-gradient(to bottom, rgba(255,42,35,0) 0%, rgba(255,42,35,0.95) 12%, rgba(255,42,35,0.95) 88%, rgba(255,42,35,0) 100%);
+  box-shadow: 0 0 8px rgba(255,42,35,0.35);
+  transform-origin: top; transform: scaleY(0); opacity: 0;
+  transition: opacity var(--dur-2) var(--ease);
+}
+.thread.on { opacity: 1; }
+/* Knoten an den Ast-Kickern, sitzen auf dem Faden */
+.branch .kicker { position: relative; }
+.branch .kicker { padding-left: 1.6rem; }
+.branch .kicker > .ring {
+  position: absolute; left: -0.02rem; top: 50%; transform: translate(-50%, -50%);
+  width: 0.6rem; height: 0.6rem; border-radius: 50%; border: 1px solid var(--red-soft);
+  background: var(--black); box-shadow: 0 0 10px rgba(255,42,35,0.6);
+}
 
 .pin {
   position: sticky; top: 0;
@@ -250,7 +282,7 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 }
 .solid.seam::before { top: -24vh; background: linear-gradient(to bottom, rgba(5,5,5,0), var(--solid)); }
 .solid.seam::after { bottom: -24vh; background: linear-gradient(to top, rgba(5,5,5,0), var(--solid)); }
-.solid-inner { max-width: 74em; margin: 0 auto; }
+.solid-inner { max-width: 74em; margin: 0; }
 .solid .body-copy { text-shadow: none; }
 
 /* Intelligence-Screens: drei Rahmen mit Caption (Platzhalter bis Produkt-Screens vorliegen) */
@@ -329,8 +361,14 @@ body.js-on .pin { will-change: auto; }
   .focus-list { margin-top: var(--s2); }
   .focus-list p { grid-template-columns: 1fr; gap: var(--s0); padding: 0.6em 0; }
   #forging { height: 160vh; }
-  #treehold { height: 140vh; }
-  .pin.top { justify-content: flex-end; padding-top: var(--navh); }   /* mobil bleibt Copy unten, Baum im Portrait-Crop schmal */
+  #hand { height: 100vh; }
+  #treehold { height: 240vh; }
+  /* mobil: die Knoten als Liste unten links (Portrait-Crop zeigt nur zwei Aeste) */
+  .nodes { position: absolute; inset: auto 1.2rem 9vh 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  .node { position: static !important; transform: none; flex-direction: row; align-items: baseline; gap: 0.8rem; padding: 0 0 0 1.6rem; }
+  .node i { left: 0; bottom: auto; top: 50%; width: 1.1rem; height: 1px; transform: translateY(-50%); background: rgba(255,42,35,0.8); }
+  .node::after { left: -0.2rem; bottom: auto; top: 50%; transform: translateY(-50%); }
+  .thread { left: 1.2rem; }
   .focus-list p:not(.on) .d { display: none; }   /* mobil: nur der aktive Sektor zeigt seine Zeile */
   .kicker::after { display: none; }
   #focus { height: 240vh; }
