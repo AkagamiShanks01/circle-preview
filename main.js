@@ -2,7 +2,8 @@
  * Codex-Audit-Fixes: Single-Flight-Cache (kein Doppel-Download), Byte-Limit
  * statt Frame-Limit, echte Coarse-Mindestparallelitaet, AbortController mit
  * Ziel-Prioritaet, Orientation-Re-Init, Fehler-Degradation auf CSS-Poster,
- * Reduced-Motion = Poster ohne Engine, Lazy-Chess-Videos, Read/Write-Batching.
+ * Reduced-Motion = Poster ohne Engine, Read/Write-Batching.
+ * Rebuild 2026-09-03: Kapitel-Marker und Videos entfernt, Frame-Counter nur ?debug=1.
  */
 (() => {
   "use strict";
@@ -11,16 +12,9 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.body.classList.add("js-on");
 
-  // ── Lazy-Videos (Chess-Rows): src erst bei Naehe, Pause ausserhalb ──
-  const vids = [...document.querySelectorAll("video[data-src]")];
-  const vio = new IntersectionObserver((es) => es.forEach((e) => {
-    const v = e.target;
-    if (e.isIntersecting) {
-      if (!v.src) v.src = v.dataset.src;
-      if (!reduced) v.play().catch(() => {});
-    } else if (v.src) v.pause();
-  }), { rootMargin: "200px" });
-  vids.forEach((v) => vio.observe(v));
+  // ── Debug-Modus (?debug=1): Frame-Counter zum Kalibrieren der Film-Zuordnung ──
+  const DEBUG = new URLSearchParams(location.search).get("debug") === "1";
+  if (DEBUG) document.getElementById("marginalia")?.removeAttribute("hidden");
 
   // ── Szenen-Copy: Beat-Choreografie (auch ohne Film-Engine) ──
   const pins = [...document.querySelectorAll(".scene .pin")].map((el) => ({
@@ -43,39 +37,19 @@
       reads.push([pn, pn.section.getBoundingClientRect()]);
     }
     const lastSection = pins[pins.length - 1].section;
-    let maxO = 0;
     for (const [pn, r] of reads) {
       const span = Math.max(1, r.height - innerHeight);
       const p = Math.min(1, Math.max(0, -r.top / span));
       const inF = r.top > 0 ? ease(1 - r.top / (innerHeight * 0.55)) : 1;
       const outF = pn.section === lastSection ? 1 : 1 - ease((p - 0.84) / 0.10);
       const o = Math.min(inF, outF);
-      if (o > maxO) maxO = o;
       pn.el.style.opacity = o.toFixed(3);
       pn.el.style.transform = o > 0.02 ? `translateY(${((1 - inF) * 4).toFixed(2)}vh)` : "translateY(4vh)";
     }
-    copyVisible = maxO;
   }
 
   const pbar = document.getElementById("pbar");
-  const chapterEl = document.getElementById("chapter");
-  const fcountEl = document.getElementById("fcount");
-  const CHAPTERS = [
-    [0.00, "I · THE SIGNAL"],
-    [0.17, "II · THE PASSAGE"],
-    [0.35, "III · THE FORGING"],
-    [0.53, "IV · THE DOCTRINE"],
-    [0.80, "V · THE FIRM"],
-  ];
-  let copyVisible = 1;
-  function updateChapter(p) {
-    if (!chapterEl) return;
-    let label = CHAPTERS[0][1];
-    for (const [s, l] of CHAPTERS) { if (p >= s) label = l; }
-    if (chapterEl.textContent !== label) chapterEl.textContent = label;
-    // nur in den reinen Film-Momenten sichtbar (keine Copy im Bild)
-    chapterEl.classList.toggle("on", copyVisible < 0.12);
-  }
+  const fcountEl = DEBUG ? document.getElementById("fcount") : null;
   function progress() {
     const max = document.documentElement.scrollHeight - innerHeight;
     return max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
@@ -120,7 +94,7 @@
       coarseStep: (portrait || small) ? 24 : 16,
       coarseWidth: (portrait || small) ? 540 : 1024,  // Coarse klein dekodieren (Byte-Fix)
       fineWidth,
-      byteCap: (portrait || small) ? 140e6 : 420e6,   // hartes Dekodier-Byte-Limit
+      byteCap: (portrait || small) ? 140e6 : 320e6,   // hartes Dekodier-Byte-Limit (420 -> 320: Renderer-Crash-Fix 2026-09-04)
     };
   }
   let C = makeConfig();
@@ -214,14 +188,15 @@
         const blob = standinBlobs.get(k);
         if (!blob) continue;
         standinPending.add(k);
-        decodeScaled(blob, 1600)
+        decodeScaled(blob, 1280)
           .then((bm) => { standin.set(k, bm); dirty = true; wake(); })
           .catch(() => {})
           .finally(() => standinPending.delete(k));
       }
     }
-    // Fenster klein halten
-    if (standin.size > 90) {
+    // Fenster klein halten (24 statt 90: 90 x 1600px-Bitmaps ~ 500MB liessen den
+    // Renderer bei ~70% Scroll abstuerzen, gemessen 2026-09-04 headless Chromium)
+    if (standin.size > 24) {
       let worst = -1, wd = -1;
       for (const k of standin.keys()) { const d = Math.abs(k - j); if (d > wd) { wd = d; worst = k; } }
       standin.get(worst)?.close?.(); standin.delete(worst);
@@ -464,7 +439,6 @@
       dirty = true;
     }
     choreograph();
-    updateChapter(p);
     if (fcountEl) fcountEl.textContent = `F ${pad(Math.round(current) + 1)} / ${pad(C.total)}`;
     pbar.style.transform = `scaleX(${p})`;
     if (dirty) { render(); dirty = false; }
