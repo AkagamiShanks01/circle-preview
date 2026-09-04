@@ -111,7 +111,7 @@
     const portrait = portraitMQ.matches;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const small = innerWidth * dpr <= 1024;
-    const total = (portrait || small) ? 609 : 914;
+    const total = (portrait || small) ? 817 : 1225;   // seq6-Sets (Master v2, 40.8s, Baum-Sequenz)
     // Fine-Ebene nur so gross dekodieren, wie das Canvas wirklich zeichnet
     // (Frames 16:9 bzw. 9:16, cover-geskalattet) — schont Decode/Budget und
     // eliminiert Eviction-Churn, ohne jemals weicher als nativ zu sein.
@@ -121,7 +121,7 @@
       : Math.max(960, Math.min(2560, Math.ceil(Math.max(vw, (vh * 16) / 9))));
     return {
       portrait, small,
-      dir: portrait ? "seqp4" : (small ? "seqm4" : "seq4"),
+      dir: portrait ? "seqp6" : (small ? "seqm6" : "seq6"),
       total,
       start: portrait ? 14 : 0,  // Mobil startet der Film mit sichtbarem Ring statt Void
       end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
@@ -133,6 +133,7 @@
     };
   }
   let C = makeConfig();
+  const FILM_END = 0.86;    // Anteil des Scrolls, an dem der Film sein letztes Bild erreicht
   const MAX_INFLIGHT = 10;
   const COARSE_MIN = 2;     // echte Mindestparallelitaet der Basis-Ebene
   const MAX_RETRY = 2;
@@ -192,18 +193,18 @@
     return resizeWidth ? decodeScaled(blob, resizeWidth, quality) : createImageBitmap(blob);
   }
 
-  // Standin-Ebene (nur Desktop): das kleine seqm4-Set (~12MB) als Sofort-Film,
-  // waehrend das scharfe seq4-Set still nachlaedt.
-  const STANDIN_TOTAL = 609;
+  // Standin-Ebene (nur Desktop): das kleine seqm6-Set (~17MB) als Sofort-Film,
+  // waehrend das scharfe seq6-Set still nachlaedt.
+  const STANDIN_TOTAL = 817;
   const useStandin = !C.portrait && !C.small;
-  const standinBlobs = new Map();   // j -> Blob (seqm4)
+  const standinBlobs = new Map();   // j -> Blob (seqm6)
   const standin = new Map();        // j -> ImageBitmap
   const standinPending = new Set();
   const toStandin = (i) => Math.round(i * (STANDIN_TOTAL - 1) / (C.total - 1));
   async function getStandinBlob(j) {
     const c = standinBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqm4/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqm6/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`m${j}`);
     const blob = await r.blob();
     standinBlobs.set(j, blob);
@@ -394,7 +395,7 @@
       clearAll();
       C = next;
       loaderDone = false; loaderStart = performance.now();
-      current = targetFrame = Math.round(progress() * C.end);
+      current = targetFrame = Math.round(Math.min(1, progress() / FILM_END) * C.end);
     } else {
       // Nur Aufloesungs-Drift: Bitmaps neu dekodieren, Blob-Cache bleibt warm
       C.fineWidth = next.fineWidth;
@@ -464,7 +465,9 @@
   }
   function raf() {
     const p = progress();
-    const target = C.start + p * (C.end - C.start);
+    // Film endet bei FILM_END des Scrolls und haelt das Schlussbild unter Founders/Contact
+    const pf = Math.min(1, p / FILM_END);
+    const target = C.start + pf * (C.end - C.start);
     targetFrame = Math.round(target);
     const settled = Math.abs(target - current) <= 0.002;
     if (!settled) {

@@ -80,10 +80,10 @@ em.red { color: var(--red-soft); }
   position: fixed; inset: 0;
   width: 100vw; height: 100vh; height: 100svh;
   z-index: 0;
-  background: var(--black) url("seq4/f0001.webp") center / cover no-repeat;
+  background: var(--black) url("seq6/f0001.webp") center / cover no-repeat;
 }
 @media (orientation: portrait) {
-  #film { background-image: url("seqp4/f0001.webp"); }
+  #film { background-image: url("seqp6/f0001.webp"); }
 }
 
 /* EIN durchgehender Lese-Scrim */
@@ -133,14 +133,23 @@ em.red { color: var(--red-soft); }
 /* ── scenes ─────────────────────────────── */
 .scene { position: relative; z-index: 3; }
 .pin .copy { text-shadow: 0 1px 2px rgba(5,5,5,0.6), 0 0 26px rgba(5,5,5,0.42); }
+/* Sektionshoehen = Film-Zuordnung (Film ist scroll-proportional, 8 Segmente a 1/8):
+   Hero=Ring · Focus=Glut · Proof=Fragmente · forging=Formung+Vollendung (nur Film) ·
+   Bridge=vollendete Bueste · Team=Hand streckt sich (A) · Edu=Pfade wachsen (B) ·
+   Intelligence statisch · Masterminds=Pull-back (C) · Founders statisch · Contact=Ende */
 #hero        { height: 200vh; }
-#focus       { height: 220vh; }   /* laenger: fuenf Fokus-Absaetze wandern */
+#focus       { height: 240vh; }   /* laenger: fuenf Fokus-Zeilen wandern */
 #proof       { height: 170vh; }
-#bridge      { height: 140vh; }
-#team        { height: 170vh; }
+#forging     { height: 240vh; }   /* Film allein: die Statue entsteht */
+#bridge      { height: 200vh; }
+#team        { height: 190vh; }
 #edu         { height: 170vh; }
-#masterminds { height: 160vh; }
+#treehold    { height: 230vh; }   /* Film allein: der fertige Baum steht, dann Pull-back */
+#masterminds { height: 150vh; }
 #close       { height: 170vh; }
+.film-only .pin { padding: 0; }
+/* Team/Edu: Copy oben links, weil der Baum die untere Bildhaelfte fuellt */
+.pin.top { justify-content: flex-start; padding-top: calc(var(--navh) + 6vh); }
 
 .pin {
   position: sticky; top: 0;
@@ -319,6 +328,9 @@ body.js-on .pin { will-change: auto; }
   .slot p { display: none; }               /* mobil nur Index + Titel, Text folgt auf der Case-Seite */
   .focus-list { margin-top: var(--s2); }
   .focus-list p { grid-template-columns: 1fr; gap: var(--s0); padding: 0.6em 0; }
+  #forging { height: 160vh; }
+  #treehold { height: 140vh; }
+  .pin.top { justify-content: flex-end; padding-top: var(--navh); }   /* mobil bleibt Copy unten, Baum im Portrait-Crop schmal */
   .focus-list p:not(.on) .d { display: none; }   /* mobil: nur der aktive Sektor zeigt seine Zeile */
   .kicker::after { display: none; }
   #focus { height: 240vh; }

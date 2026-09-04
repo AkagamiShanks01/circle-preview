@@ -17,9 +17,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='15' fill='none' stroke='%23e10600' stroke-width='4'/%3E%3C/svg%3E" />
-  <link rel="preload" as="image" href="seq4/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
-  <link rel="preload" as="image" href="seqp4/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
-  <link rel="stylesheet" href="style.css?v=21" />
+  <link rel="preload" as="image" href="seq6/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
+  <link rel="preload" as="image" href="seqp6/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
+  <link rel="stylesheet" href="style.css?v=24" />
 </head>
 <body>
   <canvas id="film" aria-hidden="true"></canvas>
@@ -34,7 +34,7 @@
     <a class="nav-contact" href="mailto:n.achiniani@copy-close.com">CONTACT</a>
   </header>
   <!-- Frame-Counter: nur Debug (?debug=1), zum Kalibrieren der Film-Zuordnung -->
-  <div class="marginalia" id="marginalia" aria-hidden="true" hidden><span id="fcount">F 0001 / 0914</span></div>
+  <div class="marginalia" id="marginalia" aria-hidden="true" hidden><span id="fcount">F 0001 / 1225</span></div>
 
   <div class="progress" aria-hidden="true"><div class="progress-bar" id="pbar"></div></div>
 
@@ -98,7 +98,10 @@
       </div>
     </section>
 
-    <!-- IV · BRIDGE — Miro oranger Hinweis · Film: Kopf fast vollständig -->
+    <!-- FILM-ONLY · die Statue formt sich und vollendet sich (Segmente 3/4/5), keine Copy -->
+    <section class="scene film-only" id="forging" aria-hidden="true"><div class="pin"></div></section>
+
+    <!-- IV · BRIDGE — Miro oranger Hinweis · Film: vollendete Büste -->
     <section class="scene" id="bridge">
       <div class="pin center">
         <div class="copy copy-center">
@@ -108,9 +111,9 @@
       </div>
     </section>
 
-    <!-- V · TEAM — Miro Ast TEAM · Film: Büste vollendet -->
+    <!-- V · TEAM — Miro Ast TEAM · Film: die Hand streckt sich aus (Segment A) -->
     <section class="scene" id="team">
-      <div class="pin">
+      <div class="pin top">
         <div class="copy pillar">
           <p class="kicker" data-n="03">TEAM</p>
           <h2 class="reveal"><span>Teams define the standards</span><span>a company lives&nbsp;by.</span></h2>
@@ -121,9 +124,9 @@
       </div>
     </section>
 
-    <!-- VI · EDU & UNI — Miro Ast EDU & UNI + Knoten Uni · Film: Vollendung, zweiter Moment -->
+    <!-- VI · EDU & UNI — Miro Ast EDU & UNI + Knoten Uni · Film: die Pfade wachsen zum Baum (Segment B) -->
     <section class="scene" id="edu">
-      <div class="pin">
+      <div class="pin top">
         <div class="copy pillar">
           <p class="kicker" data-n="04">EDU &amp; UNI</p>
           <h2 class="reveal"><span>The CEO is not your boss,</span><span>he's your&nbsp;mentor.</span></h2>
@@ -133,6 +136,9 @@
         </div>
       </div>
     </section>
+
+    <!-- FILM-ONLY · der fertige Baum steht, keine Copy -->
+    <section class="scene film-only" id="treehold" aria-hidden="true"><div class="pin"></div></section>
 
     <!-- VII · INTELLIGENCE — Miro Ast INTELLIGENCE · statisch schwarz mit Verläufen -->
     <section class="solid seam" id="intelligence">
@@ -213,6 +219,6 @@
 
   </main>
 
-  <script src="main.js?v=21"></script>
+  <script src="main.js?v=24"></script>
 </body>
 </html>
