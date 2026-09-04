@@ -45,6 +45,40 @@
     pn.focusIdx = -1;
   }
   classifyPins(); // erneut, jetzt mit lines/focus bekannt (statische Pins bekommen alle Absaetze hell)
+  // Hero-Headline in Zeichen zerlegen (Woerter bleiben unteilbar); jedes Zeichen bekommt einen Flugvektor Richtung Ring
+  const heroH1 = document.querySelector("#hero .display");
+  if (heroH1 && !reduced) {
+    let k = 0;
+    const seed = (n) => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+    const splitText = (node) => {
+      const words = node.textContent.split(/(\s+)/);
+      const frag = document.createDocumentFragment();
+      for (const w of words) {
+        if (!w) continue;
+        if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(" ")); continue; }
+        const ws = document.createElement("span"); ws.className = "w";
+        for (const chr of w) {
+          const c = document.createElement("span"); c.className = "ch"; c.textContent = chr;
+          const r1 = seed(k), r2 = seed(k + 100), r3 = seed(k + 200); k++;
+          c.style.setProperty("--dx", `${(18 + r1 * 42).toFixed(1)}vw`);
+          c.style.setProperty("--dy", `${(-34 + r2 * 26).toFixed(1)}vh`);
+          c.style.setProperty("--rot", `${((r3 - 0.5) * 140).toFixed(0)}deg`);
+          c.style.setProperty("--dl", (r1 * 0.45).toFixed(3));
+          ws.appendChild(c);
+        }
+        frag.appendChild(ws);
+      }
+      node.replaceWith(frag);
+    };
+    for (const line of heroH1.querySelectorAll("span")) {
+      for (const child of [...line.childNodes]) {
+        if (child.nodeType === 3) splitText(child);
+        else if (child.nodeType === 1) for (const t of [...child.childNodes]) if (t.nodeType === 3) splitText(t);
+      }
+    }
+  }
+  const heroPin = pins.find((pn) => pn.section.id === "hero");
+  let heroS = -1;
   const grainEl = document.getElementById("grain");
 
   // ── Baum-Knoten + Faden: Alex' Struktur entfaltet sich aus dem Lichtpfad ──
@@ -54,11 +88,13 @@
   const teamEl = document.getElementById("team");
   const mmEl = document.getElementById("masterminds");
   // Knoten liegen im 16:9-Frame (normiert); Cover-Geometrie des Canvas auf den Viewport umrechnen
+  const stageEl = document.getElementById("stage");
   function placeNodes() {
     if (!nodeEls.length || innerWidth <= 720) return;
     const vw = innerWidth, vh = innerHeight;
     const s = Math.max(vw / 1920, vh / 1080);
     const dx = (vw - 1920 * s) / 2, dy = (vh - 1080 * s) / 2;
+    if (stageEl) stageEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${s.toFixed(4)})`;
     for (const n of nodeEls) {
       n.style.left = `${(dx + parseFloat(n.dataset.x) * 1920 * s).toFixed(1)}px`;
       n.style.top = `${(dy + parseFloat(n.dataset.y) * 1080 * s).toFixed(1)}px`;
@@ -97,8 +133,16 @@
     nodesEl.classList.toggle("live", g > 0.4 && teamIn < 0.6);
   }
   // Gestaffeltes Einblenden (Stamm -> Aeste) und sanftes Scrollen zur Sektion beim Klick
+  const pulseFor = (n) => stageEl?.querySelector(`.pulse[data-for="${n.getAttribute("href").slice(1)}"]`);
   nodeEls.forEach((n, i) => {
     n.style.setProperty("--delay", `${(i * 0.12).toFixed(2)}s`);
+    const pu = pulseFor(n);
+    if (pu) {
+      pu.style.setProperty("--delay", `${(i * 0.12).toFixed(2)}s`);
+      // Hover: der Impuls laeuft vom Knoten zurueck zum Stamm
+      n.addEventListener("pointerenter", () => { pu.classList.remove("back"); void pu.offsetWidth; pu.classList.add("back"); });
+      pu.addEventListener("animationend", () => pu.classList.remove("back"));
+    }
     n.addEventListener("click", (e) => {
       const target = document.querySelector(n.getAttribute("href"));
       if (!target) return;
@@ -133,6 +177,13 @@
       const outF = (pn.section === lastSection || pn.section.id === "treehold") ? 1 : 1 - ease((p - 0.84) / 0.10);
       const o = Math.min(inF, outF);
       pn.el.style.opacity = o.toFixed(3);
+      // Ast-Kicker: Seitenast waechst mit der Einblendung
+      if (pn.section.classList.contains("branch")) pn.el.style.setProperty("--k", inF.toFixed(3));
+      // Hero: Headline zerfaellt zwischen 12% und 62% des Hero-Scrolls
+      if (pn === heroPin && heroH1) {
+        const sh = ease((p - 0.12) / 0.5);
+        if (sh !== heroS) { heroH1.style.setProperty("--s", sh.toFixed(3)); heroS = sh; }
+      }
       // Copy driftet 2vh langsamer als der Scroll (dritte Ebene neben Film und Grain)
       const drift = (1 - inF) * 4 - p * 2;
       pn.el.style.transform = o > 0.02 ? `translateY(${drift.toFixed(2)}vh)` : "translateY(4vh)";

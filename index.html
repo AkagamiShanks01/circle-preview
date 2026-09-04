@@ -19,7 +19,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='15' fill='none' stroke='%23e10600' stroke-width='4'/%3E%3C/svg%3E" />
   <link rel="preload" as="image" href="seq6/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
   <link rel="preload" as="image" href="seqp6/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
-  <link rel="stylesheet" href="style.css?v=32" />
+  <link rel="stylesheet" href="style.css?v=33" />
 </head>
 <body>
   <canvas id="film" aria-hidden="true"></canvas>
@@ -127,6 +127,14 @@
           <a class="node" href="#edu" data-x="0.399" data-y="0.856"><i></i><span>04</span><b>Edu &amp; Uni</b><small>From zero to operator, taught inside live companies. A campus in the&nbsp;making.</small></a>
           <a class="node" href="#intelligence" data-x="0.644" data-y="0.874"><i></i><span>05</span><b>Intelligence</b><small>CirclOS, Arena, Education. Built in-house, never&nbsp;sold.</small></a>
           <a class="node" href="#masterminds" data-x="0.773" data-y="0.783"><i></i><span>06</span><b>Masterminds</b><small>A few times a year, ten seats, in&nbsp;private.</small></a>
+          <!-- Zuendimpulse: laufen vom Stamm ueber den Ast zum Knoten (Frame-Koordinaten 1920x1080, JS legt die Buehne per Cover-Geometrie) -->
+          <i class="mpulse" aria-hidden="true"></i>
+          <div class="stage" id="stage" aria-hidden="true">
+            <i class="pulse" data-for="team" style="offset-path: path('M 960 690 Q 620 690 409 876')"></i>
+            <i class="pulse" data-for="edu" style="offset-path: path('M 960 690 Q 790 790 766 924')"></i>
+            <i class="pulse" data-for="intelligence" style="offset-path: path('M 960 690 Q 1130 800 1236 944')"></i>
+            <i class="pulse" data-for="masterminds" style="offset-path: path('M 960 690 Q 1300 690 1484 846')"></i>
+          </div>
         </div>
       </div>
     </section>
@@ -237,6 +245,6 @@
 
   </main>
 
-  <script src="main.js?v=32"></script>
+  <script src="main.js?v=33"></script>
 </body>
 </html>
