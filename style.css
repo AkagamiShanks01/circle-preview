@@ -26,7 +26,7 @@
   --t4: clamp(1rem, 1.5vw, 1.2rem);               /* Team-Line */
   --t5h: clamp(1.45rem, 2.4vw, 2.3rem);           /* H2: Pillars, Founders, Contact (OOAK-Mass: ruhig, max 22ch) */
   --t5s: clamp(1.7rem, 3.2vw, 3.2rem);            /* Scene-Line: Bridge */
-  --t5d: clamp(2.6rem, 6vw, 6rem);                /* Display: nur Hero */
+  --t5d: clamp(2.4rem, 6vw, 6rem);                /* Display: nur Hero (2.4rem: 'Building people' passt auf 390px) */
 
   /* Zeit */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -240,6 +240,8 @@ body.js-on .reveal span { will-change: opacity, transform; }
 @keyframes rise { from { opacity: 0; transform: translateY(1.1em); } to { opacity: 1; transform: none; } }
 body.js-on #hero .display span { animation: rise var(--dur-3) var(--ease) both; }
 body.js-on #hero .display span:nth-child(2) { animation-delay: 0.12s; }
+body.js-on #hero .display span:nth-child(3) { animation-delay: 0.24s; }
+#hero .copy { max-width: 56em; }   /* drei Display-Zeilen ohne Umbruch */
 body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 
 .sub { margin-top: var(--s3); max-width: 28em; }
