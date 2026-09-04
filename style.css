@@ -86,10 +86,10 @@ em.red { color: var(--red-soft); }
   position: fixed; inset: 0;
   width: 100vw; height: 100vh; height: 100svh;
   z-index: 0;
-  background: var(--black) url("seq7/f0001.webp") center / cover no-repeat;
+  background: var(--black) url("seq8/f0001.webp") center / cover no-repeat;
 }
 @media (orientation: portrait) {
-  #film { background-image: url("seqp6/f0001.webp"); }
+  #film { background-image: url("seqp8/f0001.webp"); }
 }
 
 /* Funken-Ebene ueber dem Film, unter dem Scrim */
@@ -155,7 +155,7 @@ em.red { color: var(--red-soft); }
 #forging     { height: 240vh; }   /* Film allein: die Statue entsteht */
 #bridge      { height: 190vh; }   /* vollendete Bueste */
 #hand        { height: 120vh; }   /* Film allein: die Hand streckt sich aus */
-#treehold    { height: 330vh; }   /* die Pfade wachsen; die letzten 60vh haelt der Film auf dem Baum, die Knoten tragen Alex' Struktur */
+#treehold    { height: 430vh; }   /* die Pfade wachsen; die letzten 60vh haelt der Film auf dem Baum, die Knoten tragen Alex' Struktur */
 #team        { height: 170vh; }
 #edu         { height: 170vh; }
 #masterminds { height: 150vh; }
@@ -508,7 +508,7 @@ body.js-on .pin { will-change: auto; }
   .focus-list p::after { left: calc(var(--tb) * 100% - 0.6em); }
   #forging { height: 160vh; }
   #hand { height: 100vh; }
-  #treehold { height: 240vh; }
+  #treehold { height: 320vh; }
   /* mobil: die Knoten als Liste unten links (Portrait-Crop zeigt nur zwei Aeste) */
   .nodes { position: absolute; inset: auto 1.2rem 9vh 1.2rem; display: flex; flex-direction: column; gap: 1.1rem; }
   /* lokaler Lese-Scrim hinter der Liste (die Buste darunter ist hell) */

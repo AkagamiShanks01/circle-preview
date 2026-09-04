@@ -135,7 +135,7 @@
   //   0 .. treeholdEnd-HOLD  -> Frames 0 .. TREE_FRAC (der Baum steht)
   //   treeholdEnd-HOLD .. treeholdEnd -> Halt auf dem Baum (die Knoten tragen Alex' Struktur)
   //   treeholdEnd .. eduEnd -> Rest des Films (Pull-back), danach haelt das Schlussbild
-  const TREE_FRAC = 705 / 816;   // Frame, an dem der Baum vollstaendig steht (Segment-B-Ende)
+  const TREE_FRAC = 816 / 917;   // Frame, an dem der Baum vollstaendig steht (Segment-B-Ende)
   const treeholdEl = document.getElementById("treehold");
   const eduEl = document.getElementById("edu");
   let FM = { a: 1, b: 1, c: 1 };
@@ -365,7 +365,7 @@
     const portrait = portraitMQ.matches;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const small = innerWidth * dpr <= 1024;
-    const total = 817;   // seq7/seqp6/seqm7: jeder 3. Frame des 4K60-Masters v2 (40.8s), alle Tiers gleich indiziert
+    const total = 918;   // seq8/seqp8/seqm8: jeder 3. Frame des 4K60-Masters v3, alle Tiers gleich indiziert
     // Fine-Ebene nur so gross dekodieren, wie das Canvas wirklich zeichnet
     // (Frames 16:9 bzw. 9:16, cover-geskalattet) — schont Decode/Budget und
     // eliminiert Eviction-Churn, ohne jemals weicher als nativ zu sein.
@@ -375,7 +375,7 @@
       : Math.max(960, Math.min(1920, Math.ceil(Math.max(vw, (vh * 16) / 9))));
     return {
       portrait, small,
-      dir: portrait ? "seqp6" : (small ? "seqm7" : "seq7"),
+      dir: portrait ? "seqp8" : (small ? "seqm8" : "seq8"),
       total,
       start: portrait ? 14 : 0,  // Mobil startet der Film mit sichtbarem Ring statt Void
       end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
@@ -449,7 +449,7 @@
 
   // Standin-Ebene (nur Desktop): seqm7 (960px, ~12MB), 1:1 zum Fine-Set indiziert,
   // waehrend das scharfe seq7-Set (1920px) still nachlaedt.
-  const STANDIN_TOTAL = 817;
+  const STANDIN_TOTAL = 918;
   const useStandin = !C.portrait && !C.small;
   const standinBlobs = new Map();   // j -> Blob (seqm7)
   const standin = new Map();        // j -> ImageBitmap
@@ -458,7 +458,7 @@
   async function getStandinBlob(j) {
     const c = standinBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqm7/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqm8/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`m${j}`);
     const blob = await r.blob();
     standinBlobs.set(j, blob);
@@ -496,14 +496,14 @@
 
   // Sofort-Set (alle Formfaktoren): seqc7 = jeder 2. Frame des Sets in 480px (~1MB gesamt).
   // Wird zuerst komplett geladen, damit der Scrub nach <1s ueberall greift; Dekodierung nah am Ziel.
-  const COARSE_TOTAL = 409;
+  const COARSE_TOTAL = 459;
   const coarseBlobs = new Map();    // j -> Blob (seqc7)
   const coarsePending = new Set();
   const toCoarse = (i) => Math.min(COARSE_TOTAL - 1, Math.floor(i / 2));
   async function getCoarseBlob(j) {
     const c = coarseBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqc7/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqc8/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`c${j}`);
     const blob = await r.blob();
     coarseBlobs.set(j, blob);
