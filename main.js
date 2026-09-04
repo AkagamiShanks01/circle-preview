@@ -135,7 +135,7 @@
   //   0 .. treeholdEnd-HOLD  -> Frames 0 .. TREE_FRAC (der Baum steht)
   //   treeholdEnd-HOLD .. treeholdEnd -> Halt auf dem Baum (die Knoten tragen Alex' Struktur)
   //   treeholdEnd .. eduEnd -> Rest des Films (Pull-back), danach haelt das Schlussbild
-  const TREE_FRAC = 816 / 917;   // Frame, an dem der Baum vollstaendig steht (Segment-B-Ende)
+  const TREE_FRAC = 1224 / 1376;   // Frame, an dem der Baum vollstaendig steht (Segment-B-Ende)
   const treeholdEl = document.getElementById("treehold");
   const eduEl = document.getElementById("edu");
   let FM = { a: 1, b: 1, c: 1 };
@@ -145,11 +145,48 @@
     const tEnd = treeholdEl ? treeholdEl.getBoundingClientRect().bottom + y - innerHeight : Infinity;
     const eEnd = eduEl ? eduEl.getBoundingClientRect().bottom + y - innerHeight : tEnd + 1;
     FM = { a: Math.max(1, tEnd - hold), b: Math.max(1, tEnd), c: Math.max(tEnd + 1, eEnd - innerHeight * 0.4) };
+    const br = document.getElementById("bridge");
+    const bTop = br ? br.getBoundingClientRect().top + y : null;
+    MAGNETS = [FM.a + hold * 0.15];
+    if (bTop != null) MAGNETS.push(bTop + (br.getBoundingClientRect().height - innerHeight) * 0.45);
+  }
+  let MAGNETS = [];
+  const magnetsOn = !reduced && matchMedia("(hover: hover)").matches;
+  let magnetArmed = true, magnetBusy = 0;
+  // Sanfter Magnet: steht der Scroll nahe einem Anker, zieht er sich einmal dorthin; loest erst wieder aus, wenn man sich entfernt hat
+  let magTimer = 0, magY = -1;
+  function scheduleMagnet() {
+    if (!magnetsOn) return;
+    clearTimeout(magTimer); magY = scrollY;
+    magTimer = setTimeout(() => { if (Math.abs(scrollY - magY) < 2) magnet(performance.now()); }, 240);
+  }
+  function magnet(now) {
+    if (!magnetsOn || now < magnetBusy) return;
+    const y = scrollY;
+    let near = null;
+    for (const m of MAGNETS) if (Math.abs(y - m) < innerHeight * 0.14) near = m;
+    if (near == null) { magnetArmed = true; return; }
+    if (!magnetArmed || Math.abs(y - near) < 2) return;
+    magnetArmed = false; magnetBusy = now + 900;
+    scrollTo({ top: near, behavior: "smooth" });
   }
   measureFilmMap();
+  // Zeit-Remapping: Beats des Films (Anteile des Baum-Frames) mit Gewicht = Scroll pro Filmzeit.
+  // Guss aus der Hand laeuft in Zeitlupe (1.9), Uebergaenge schneller.
+  const BEATS = [[0, 0.6253, 1.0], [0.6253, 0.7503, 1.15], [0.7503, 0.875, 1.9], [0.875, 1.0, 1.35]];
+  const beatTotal = BEATS.reduce((s, b) => s + (b[1] - b[0]) * b[2], 0);
+  function remapTree(u) {
+    let acc = 0;
+    for (const [a, b, w] of BEATS) {
+      const span = (b - a) * w / beatTotal;
+      if (u <= acc + span) return a + ((u - acc) / span) * (b - a);
+      acc += span;
+    }
+    return 1;
+  }
   function filmFrac(y) {
     if (!treeholdEl) return Math.min(1, y / Math.max(1, document.documentElement.scrollHeight - innerHeight) / FILM_END);
-    if (y <= FM.a) return TREE_FRAC * (y / FM.a);
+    if (y <= FM.a) return TREE_FRAC * remapTree(Math.max(0, y) / FM.a);
     if (y <= FM.b) return TREE_FRAC;
     return Math.min(1, TREE_FRAC + (1 - TREE_FRAC) * ((y - FM.b) / Math.max(1, FM.c - FM.b)));
   }
@@ -289,7 +326,7 @@
       px = (e.clientX / innerWidth) * 2 - 1; py = (e.clientY / innerHeight) * 2 - 1;
       applyParallax(); wakeFilm();
     }, { passive: true });
-    addEventListener("pointerleave", () => { mouseX = -1; applyParallax(); });
+    addEventListener("pointerleave", () => { mouseX = -1; applyParallax(); wakeFilm(); });
   } else if (!reduced && "DeviceOrientationEvent" in window) {
     addEventListener("deviceorientation", (e) => {
       if (e.gamma == null) return;
@@ -365,7 +402,7 @@
     const portrait = portraitMQ.matches;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     const small = innerWidth * dpr <= 1024;
-    const total = 918;   // seq9/seqp9/seqm9: jeder 3. Frame des 4K60-Masters v3, alle Tiers gleich indiziert
+    const total = 1377;   // seq10/seqp10/seqm10: jeder 3. Frame des 4K60-Masters v3, alle Tiers gleich indiziert
     // Fine-Ebene nur so gross dekodieren, wie das Canvas wirklich zeichnet
     // (Frames 16:9 bzw. 9:16, cover-geskalattet) — schont Decode/Budget und
     // eliminiert Eviction-Churn, ohne jemals weicher als nativ zu sein.
@@ -375,7 +412,7 @@
       : Math.max(960, Math.min(1920, Math.ceil(Math.max(vw, (vh * 16) / 9))));
     return {
       portrait, small,
-      dir: portrait ? "seqp9" : (small ? "seqm9" : "seq9"),
+      dir: portrait ? "seqp10" : (small ? "seqm10" : "seq10"),
       total,
       start: portrait ? 14 : 0,  // Mobil startet der Film mit sichtbarem Ring statt Void
       end: total - 1,  // Film laeuft bis zur letzten Scroll-Position durch (Nicolas 2026-08-26)
@@ -449,7 +486,7 @@
 
   // Standin-Ebene (nur Desktop): seqm7 (960px, ~12MB), 1:1 zum Fine-Set indiziert,
   // waehrend das scharfe seq7-Set (1920px) still nachlaedt.
-  const STANDIN_TOTAL = 918;
+  const STANDIN_TOTAL = 1377;
   const useStandin = !C.portrait && !C.small;
   const standinBlobs = new Map();   // j -> Blob (seqm7)
   const standin = new Map();        // j -> ImageBitmap
@@ -458,7 +495,7 @@
   async function getStandinBlob(j) {
     const c = standinBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqm9/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqm10/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`m${j}`);
     const blob = await r.blob();
     standinBlobs.set(j, blob);
@@ -496,14 +533,14 @@
 
   // Sofort-Set (alle Formfaktoren): seqc7 = jeder 2. Frame des Sets in 480px (~1MB gesamt).
   // Wird zuerst komplett geladen, damit der Scrub nach <1s ueberall greift; Dekodierung nah am Ziel.
-  const COARSE_TOTAL = 459;
+  const COARSE_TOTAL = 689;
   const coarseBlobs = new Map();    // j -> Blob (seqc7)
   const coarsePending = new Set();
   const toCoarse = (i) => Math.min(COARSE_TOTAL - 1, Math.floor(i / 2));
   async function getCoarseBlob(j) {
     const c = coarseBlobs.get(j);
     if (c) return c;
-    const r = await fetch(`seqc9/f${pad(j + 1)}.webp`);
+    const r = await fetch(`seqc10/f${pad(j + 1)}.webp`);
     if (!r.ok) throw new Error(`c${j}`);
     const blob = await r.blob();
     coarseBlobs.set(j, blob);
@@ -583,7 +620,7 @@
         if (isCoarse) {
           coarse.set(i, bm); coarseBytes += entryBytes(bm);
         } else {
-          if (Math.abs(i - targetFrame) > C.window * 1.5) { bm.close?.(); return; }
+          if (Math.abs(i - biasedCenter()) > C.window * 1.5) { bm.close?.(); return; }
           fine.set(i, bm); fineBytes += entryBytes(bm);
         }
         dirty = true; wake();
@@ -596,8 +633,10 @@
       });
   }
 
+  let frameVel = 0, prevTarget = 0;
+  const biasedCenter = () => Math.round(targetFrame + Math.max(-C.window * 0.6, Math.min(C.window * 0.6, frameVel * 8)));
   function pump() {
-    const center = targetFrame;  // Ziel priorisieren, nicht den gelerpten Zwischenstand
+    const center = biasedCenter();  // Ziel plus Richtungs-Bias: Fenster laeuft dem Scroll voraus
     // Veraltete Fine-Requests abbrechen
     for (const [i, p] of pending) {
       if (!p.isCoarse && Math.abs(i - center) > C.window * 1.5) p.ctrl.abort();
@@ -619,7 +658,7 @@
   }
 
   function evict() {
-    const center = targetFrame;
+    const center = biasedCenter();
     const lim = Math.round(C.window * 1.5);
     for (const [k, bm] of fine) {
       if (k < center - lim || k > center + lim) {
@@ -720,7 +759,37 @@
   setTimeout(onViewportChange, 600);
   setTimeout(onViewportChange, 2000);
 
+  // Retina-Stufe (2560) nur fuer den Baum-Halt: seqr10 f1201..f1246 = Indizes 1200..1245
+  const HI = { dir: "seqr10", from: 1200, to: 1245, map: new Map(), pending: new Set(), cap: 10 };
+  const hiOn = () => (devicePixelRatio || 1) >= 1.5 && !C.portrait && !C.small;
+  function hiAt(i) {
+    if (!hiOn() || i < HI.from || i > HI.to) return null;
+    const b = HI.map.get(i);
+    if (b) return b;
+    if (!HI.pending.has(i) && HI.pending.size < 2) {
+      HI.pending.add(i);
+      fetch(`${HI.dir}/f${pad(i + 1)}.webp`).then((r) => r.ok ? r.blob() : Promise.reject()).then((bl) => createImageBitmap(bl))
+        .then((bm) => {
+          if (HI.map.size >= HI.cap) { let worst = -1, wd = -1; for (const k of HI.map.keys()) { const d = Math.abs(k - i); if (d > wd) { wd = d; worst = k; } } HI.map.get(worst)?.close?.(); HI.map.delete(worst); }
+          HI.map.set(i, bm); dirty = true; wake();
+        }).catch(() => {}).finally(() => HI.pending.delete(i));
+    }
+    return null;
+  }
+  // Filmlicht: pro Coarse-Frame die Glutfarbe (media/glow.json), als --glow an :root
+  let GLOW = null, lastGlow = -1;
+  fetch("media/glow.json").then((r) => r.ok ? r.json() : null).then((g) => { GLOW = g; lastGlow = -1; }).catch(() => {});
+  function updateGlow(i) {
+    if (!GLOW) return;
+    const ci = Math.min(GLOW.length - 1, toCoarse(i));
+    if (ci === lastGlow) return;
+    lastGlow = ci;
+    const c = GLOW[ci];
+    document.documentElement.style.setProperty("--glow", `rgb(${c[0]} ${c[1]} ${c[2]})`);
+  }
   function bestAt(i) {
+    const h = hiAt(i);
+    if (h) return h;
     const f = fine.get(i);
     if (f) return f;
     for (let d = 1; d <= 6; d++) {
@@ -740,24 +809,129 @@
     ctx.drawImage(img, (cw - img.width * s) / 2 + ox, (ch - img.height * s) / 2 + oy, img.width * s, img.height * s);
   }
 
+  // ── (F) 2.5D: WebGL-Pfad mit Tiefenkarten (media/depth10, indiziert wie das Sofort-Set). Pixel werden nach Tiefe
+  //    gegen Maus und Scroll verschoben, Vordergrund staerker als Hintergrund. Faellt still auf den 2D-Pfad zurueck. ──
+  const GLD = { on: false, gl: null, prog: null, texA: null, texB: null, texD: null, idA: null, idB: null, idD: null, depth: new Map(), pend: new Set(), canvas: null, u: {} };
+  function initGL() {
+    if (reduced || C.portrait || C.small || !("WebGLRenderingContext" in window)) return;
+    const c = document.createElement("canvas"); c.id = "filmgl"; c.setAttribute("aria-hidden", "true");
+    canvas.after(c);
+    const gl = c.getContext("webgl", { alpha: false, antialias: false, premultipliedAlpha: false, powerPreference: "high-performance" });
+    if (!gl) { c.remove(); return; }
+    const vs = "attribute vec2 p; varying vec2 v; void main(){ v = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }";
+    const fs = `precision mediump float; varying vec2 v; uniform sampler2D uA, uB, uD; uniform float uMix, uHasD; uniform vec2 uScale, uTrans, uOff;
+      void main(){ vec2 uv = vec2(v.x, 1.0 - v.y) * uScale + uTrans;
+        float d = uHasD > 0.5 ? texture2D(uD, uv).r : 1.0;
+        float far = clamp((0.42 - d) / 0.42, 0.0, 1.0);   // nur der Hintergrund (Nebel, Dunkel) wandert; Statue, Stab, Ringe bleiben stehen
+        vec2 uv2 = clamp(uv + far * far * uOff, 0.001, 0.999);
+        gl_FragColor = mix(texture2D(uA, uv2), texture2D(uB, uv2), uMix); }`;
+    const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(o)); return o; };
+    try {
+      const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link");
+      gl.useProgram(prog);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      const mk = () => { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return t; };
+      GLD.texA = mk(); GLD.texB = mk(); GLD.texD = mk();
+      for (const n of ["uA", "uB", "uD", "uMix", "uHasD", "uScale", "uTrans", "uOff"]) GLD.u[n] = gl.getUniformLocation(prog, n);
+      gl.uniform1i(GLD.u.uA, 0); gl.uniform1i(GLD.u.uB, 1); gl.uniform1i(GLD.u.uD, 2);
+      GLD.gl = gl; GLD.prog = prog; GLD.canvas = c; GLD.on = true;
+      c.style.visibility = "hidden";   // bis zum ersten Frame bleibt das CSS-Poster auf #film sichtbar
+    } catch (e) { c.remove(); GLD.on = false; }
+  }
+  function depthAt(i) {
+    const j = toCoarse(i);
+    const d = GLD.depth.get(j);
+    if (d) return { j, bm: d };
+    for (let k = 1; k <= 8; k++) {
+      if (j - k >= 0 && !GLD.depth.has(j - k) && !GLD.pend.has(j - k) && GLD.pend.size < 3) requestDepth(j - k);
+      if (!GLD.depth.has(j + k) && !GLD.pend.has(j + k) && GLD.pend.size < 3) requestDepth(j + k);
+    }
+    if (!GLD.pend.has(j) && GLD.pend.size < 4) requestDepth(j);
+    for (let k = 1; k <= 6; k++) { const a = GLD.depth.get(j - k); if (a) return { j: j - k, bm: a }; const b = GLD.depth.get(j + k); if (b) return { j: j + k, bm: b }; }
+    return null;
+  }
+  function requestDepth(j) {
+    if (j < 0 || j >= COARSE_TOTAL) return;
+    GLD.pend.add(j);
+    fetch(`media/depth10/f${pad(j + 1)}.webp`).then((r) => r.ok ? r.blob() : Promise.reject()).then((b) => createImageBitmap(b))
+      .then((bm) => {
+        if (GLD.depth.size > 90) { let worst = -1, wd = -1; for (const k of GLD.depth.keys()) { const d = Math.abs(k - j); if (d > wd) { wd = d; worst = k; } } GLD.depth.get(worst)?.close?.(); GLD.depth.delete(worst); }
+        GLD.depth.set(j, bm); dirty = true; wake();
+      }).catch(() => {}).finally(() => GLD.pend.delete(j));
+  }
+  function upload(tex, unit, bm) {
+    const gl = GLD.gl; gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, bm);
+  }
+  function renderGL(a, b, frac, ia, ib) {
+    const gl = GLD.gl, c = GLD.canvas;
+    if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; gl.viewport(0, 0, cw, ch); }
+    // Cache nach Bitmap-Identitaet (nicht Index): bestAt liefert anfangs Nachbarn/Standins fuer denselben Index
+    if (GLD.idA !== a) { upload(GLD.texA, 0, a); GLD.idA = a; }
+    if (b && GLD.idB !== b) { upload(GLD.texB, 1, b); GLD.idB = b; }
+    const dp = depthAt(ia);
+    if (dp && GLD.idD !== dp.bm) { upload(GLD.texD, 2, dp.bm); GLD.idD = dp.bm; }
+    // Cover-Geometrie wie im 2D-Pfad: Texturausschnitt in UV (0..1), plus Hero-Parallaxe und 2% Reserve fuer die Verschiebung
+    const k = heroVis;
+    const zoom = (1 + 0.035 * k) * 1.02;
+    const s = Math.max(cw / a.width, ch / a.height) * zoom;
+    const drawW = a.width * s, drawH = a.height * s;
+    const ox = -px * k * cw * 0.014, oy = -py * k * ch * 0.012;
+    const x0 = (cw - drawW) / 2 + ox, y0 = (ch - drawH) / 2 + oy;
+    gl.uniform2f(GLD.u.uScale, cw / drawW, ch / drawH);
+    gl.uniform2f(GLD.u.uTrans, -x0 / drawW, -y0 / drawH);
+    gl.uniform1f(GLD.u.uMix, b ? frac : 0);
+    gl.uniform1f(GLD.u.uHasD, dp ? 1 : 0);
+    // Tiefen-Parallaxe: Maus (px,py) und leichte Scroll-Drift; Vordergrund wandert gegen die Maus
+    gl.uniform2f(GLD.u.uOff, -px * 0.03 - Math.sin(scrollY * 0.0015) * 0.006, py * 0.02);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+  initGL();
+
   let firstDraw = false;
   function render() {
-    const lo = Math.floor(current);
+    const cur = Math.min(C.end, Math.max(0, current + loopOffset));
+    const lo = Math.floor(cur);
     const hi = Math.min(C.end, lo + 1);
-    const frac = current - lo;
+    const frac = cur - lo;
     const a = bestAt(lo);
     if (!a) return; // CSS-Poster bleibt sichtbar, bis das erste Bitmap da ist
     const b = hi !== lo ? bestAt(hi) : null;
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "#050505";
-    ctx.fillRect(0, 0, cw, ch);
-    drawImageCover(a, 1);
-    if (b && b !== a && frac > 0.02) drawImageCover(b, frac);
-    ctx.globalAlpha = 1;
-    if (!firstDraw) { firstDraw = true; canvas.style.backgroundImage = "none"; }
+    if (GLD.on) {
+      try { renderGL(a, (b && b !== a && frac > 0.02) ? b : null, frac, lo, hi); }
+      catch (e) { GLD.on = false; GLD.canvas?.remove(); canvas.style.visibility = ""; }
+    }
+    if (!GLD.on) {
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#050505";
+      ctx.fillRect(0, 0, cw, ch);
+      drawImageCover(a, 1);
+      if (b && b !== a && frac > 0.02) drawImageCover(b, frac);
+      ctx.globalAlpha = 1;
+    }
+    if (!firstDraw) { firstDraw = true; canvas.style.backgroundImage = "none"; if (GLD.on) { GLD.canvas.style.visibility = ""; canvas.style.visibility = "hidden"; } }
   }
 
   // ── Scrub-Loop mit Idle-Stopp ────────────
+  const fog1 = document.getElementById("fog1"), fog2 = document.getElementById("fog2");
+  // (E9) Zweiter Halt am Guss: steht der Scroll im Guss-Band, fliesst das Magma als kurze Schleife weiter (+-LOOP_AMP Frames, Ping-Pong)
+  const POUR = { from: 0.7503, to: 0.875 };   // Anteile des Baum-Frames (Segment S2)
+  const LOOP_AMP = 10, LOOP_HZ = 0.3;
+  let loopOffset = 0, loopT0 = 0, loopOn = false;
+  function pourLoop(pf, now) {
+    const f = pf / TREE_FRAC;
+    const inBand = f > POUR.from + 0.01 && f < POUR.to - 0.01;
+    if (!inBand) { if (loopOn) { loopOn = false; loopOffset = 0; dirty = true; } return false; }
+    if (!loopOn) { loopOn = true; loopT0 = now; }
+    const ph = ((now - loopT0) / 1000) * LOOP_HZ * 2 * Math.PI;
+    const next = Math.sin(ph) * LOOP_AMP;
+    if (Math.abs(next - loopOffset) > 0.05) { loopOffset = next; dirty = true; }
+    return true;
+  }
+  let settledPrev = false;
   let rafActive = false;
   function wake() {
     if (!rafActive) { rafActive = true; requestAnimationFrame(raf); }
@@ -768,6 +942,9 @@
     const pf = filmFrac(scrollY);
     const target = C.start + pf * (C.end - C.start);
     targetFrame = Math.round(target);
+    frameVel = frameVel * 0.8 + (targetFrame - prevTarget) * 0.2; prevTarget = targetFrame;
+    updateGlow(Math.round(current));
+    if (fog1) { fog1.style.transform = `translate3d(${(px * -18 - scrollY * 0.035 % 1200).toFixed(1)}px, ${(py * -12 - scrollY * 0.06 % 1200).toFixed(1)}px, 0)`; fog2.style.transform = `translate3d(${(px * 26 + scrollY * 0.02 % 1900).toFixed(1)}px, ${(py * 16 - scrollY * 0.09 % 1900).toFixed(1)}px, 0)`; }
     const settled = Math.abs(target - current) <= 0.002;
     if (!settled) {
       current += (target - current) * 0.16;
@@ -784,7 +961,11 @@
     if (fcountEl) fcountEl.textContent = `F ${pad(Math.round(current) + 1)} / ${pad(C.total)}`;
     pbar.style.transform = `scaleX(${p})`;
     if (dirty) { render(); dirty = false; }
-    if (settled && !dirty && !sparksAlive) { rafActive = false; return; }
+    let looping = false;
+    if (settled) { const now = performance.now(); looping = pourLoop(pf, now); if (!settledPrev) scheduleMagnet(); }
+    else if (loopOn) { loopOn = false; loopOffset = 0; }
+    settledPrev = settled;
+    if (settled && !dirty && !sparksAlive && !looping) { rafActive = false; return; }
     requestAnimationFrame(raf);
   }
   wakeFilm = () => { dirty = true; wake(); };

@@ -82,14 +82,15 @@ em.red { color: var(--red-soft); }
 }
 
 /* CSS-Poster: erster Frame sichtbar, bevor JS laeuft — und Degradationspfad */
+#filmgl { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100svh; z-index: 0; background: var(--black); }
 #film {
   position: fixed; inset: 0;
   width: 100vw; height: 100vh; height: 100svh;
   z-index: 0;
-  background: var(--black) url("seq9/f0001.webp") center / cover no-repeat;
+  background: var(--black) url("seq10/f0001.webp") center / cover no-repeat;
 }
 @media (orientation: portrait) {
-  #film { background-image: url("seqp9/f0001.webp"); }
+  #film { background-image: url("seqp10/f0001.webp"); }
 }
 
 /* Funken-Ebene ueber dem Film, unter dem Scrim */
@@ -98,6 +99,10 @@ em.red { color: var(--red-soft); }
 /* (1) Glutschein, der der Maus im Hero folgt */
 .cursorglow { position: fixed; left: 0; top: 0; width: 42vmin; height: 42vmin; margin: -21vmin 0 0 -21vmin; border-radius: 50%; z-index: 2; pointer-events: none; opacity: 0;
   background: radial-gradient(circle, rgba(255,42,35,0.22) 0%, rgba(255,42,35,0.08) 40%, rgba(255,42,35,0) 70%); mix-blend-mode: screen; will-change: transform, opacity; }
+/* (E5) Nebel-Ebenen ueber dem Text: leise, additiv, driften mit Scroll (JS) */
+.fog { position: fixed; inset: -25%; z-index: 5; pointer-events: none; opacity: 0.16; mix-blend-mode: screen;
+  background: url("media/fog.webp") 0 0 / 1200px 1200px repeat; will-change: transform; }
+.fog2 { opacity: 0.11; background-size: 1900px 1900px; }
 /* EIN durchgehender Lese-Scrim */
 .shade {
   position: fixed; inset: 0;
@@ -133,7 +138,8 @@ em.red { color: var(--red-soft); }
 }
 
 .progress { position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 41; }
-.progress-bar { height: 100%; width: 100%; background: var(--red); transform: scaleX(0); transform-origin: left; }
+:root { --glow: #ff2a23; --accent: color-mix(in srgb, var(--red-soft) 55%, var(--glow) 45%); }
+.progress-bar { height: 100%; width: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; }
 
 /* Debug-Marginalie: nur mit ?debug=1 sichtbar (JS entfernt das hidden-Attribut) */
 .marginalia {
@@ -195,7 +201,7 @@ em.red { color: var(--red-soft); }
 @keyframes travelback { 0% { offset-distance: 100%; opacity: 0; } 15% { opacity: 1; } 100% { offset-distance: 0%; opacity: 0; } }
 .node i { position: absolute; bottom: 0.45rem; width: 1px; height: 1.9rem; transform-origin: bottom; transform: scaleY(0); background: linear-gradient(to bottom, rgba(244,242,238,0.9), rgba(255,42,35,0.9)); transition: transform var(--dur-2) var(--ease); transition-delay: calc(var(--delay, 0s) + 0.15s); }
 .nodes.live .node i { transform: scaleY(1); }
-.node::after { content: ""; position: absolute; bottom: -0.1rem; width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 1px solid var(--red-soft); box-shadow: 0 0 10px rgba(255,42,35,0.7); transition: transform var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease); }
+.node::after { content: ""; position: absolute; bottom: -0.1rem; width: 0.55rem; height: 0.55rem; border-radius: 50%; border: 1px solid var(--accent); box-shadow: 0 0 10px rgba(255,42,35,0.7); transition: transform var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease); }
 .nodes.live .node::after { animation: pulse 2.4s var(--ease) infinite; animation-delay: var(--delay, 0s); }
 @keyframes pulse { 0%, 100% { box-shadow: 0 0 10px rgba(255,42,35,0.7); } 50% { box-shadow: 0 0 22px rgba(255,42,35,1), 0 0 44px rgba(255,42,35,0.5); } }
 .node span { font-size: var(--t0); letter-spacing: 0.3em; color: var(--faint); font-variant-numeric: tabular-nums; }
@@ -224,8 +230,8 @@ em.red { color: var(--red-soft); }
 .thread {
   position: fixed; top: 0; bottom: 0; width: 1px; z-index: 4; pointer-events: none;
   left: calc(clamp(1.5rem, 6vw, 7rem) + 0.28rem);
-  background: linear-gradient(to bottom, rgba(255,42,35,0) 0%, rgba(255,42,35,0.95) 12%, rgba(255,42,35,0.95) 88%, rgba(255,42,35,0) 100%);
-  box-shadow: 0 0 8px rgba(255,42,35,0.35);
+  background: linear-gradient(to bottom, transparent 0%, var(--accent) 12%, var(--accent) 88%, transparent 100%);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
   transform-origin: top; transform: scaleY(0); opacity: 0;
   transition: opacity var(--dur-2) var(--ease);
 }
@@ -303,7 +309,7 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 
 /* ── Pillars (H2-Tier) ─────────────────── */
 /* Kicker traegt die Sektionsnummer: Struktur auf den ersten Blick (01 · FOCUS) */
-.kicker { color: var(--red-soft); margin-bottom: var(--s2); display: flex; align-items: baseline; gap: 1.2em; }
+.kicker { color: var(--accent); margin-bottom: var(--s2); display: flex; align-items: baseline; gap: 1.2em; }
 .kicker::before { content: attr(data-n); color: var(--faint); font-variant-numeric: tabular-nums; letter-spacing: 0.2em; }
 .kicker::after { content: ""; flex: 0 0 3rem; height: 1px; background: var(--hairline); align-self: center; }
 .pillar h2, .solid h2 {
@@ -317,7 +323,7 @@ body.js-on #hero .sub { animation: rise var(--dur-3) var(--ease) 0.4s both; }
 /* Ring zeichnet sich von oben im Uhrzeigersinn (conic-gradient bis --ring*360deg, radiale Maske laesst nur den Rand) */
 .ring-frame { position: absolute; inset: -18% -9% -18% -11%; pointer-events: none; z-index: -1; border-radius: 50%; }
 .ring-frame::before, .ring-frame::after { content: ""; position: absolute; inset: 0; border-radius: 50%;
-  background: conic-gradient(from 0deg, var(--red-soft) 0deg, var(--red-soft) calc(var(--ring, 1) * 360deg), transparent calc(var(--ring, 1) * 360deg + 0.5deg), transparent 360deg); }
+  background: conic-gradient(from 0deg, var(--accent) 0deg, var(--accent) calc(var(--ring, 1) * 360deg), transparent calc(var(--ring, 1) * 360deg + 0.5deg), transparent 360deg); }
 .ring-frame::after { -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px)); }
 .ring-frame::before { -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 6px), #000 100%); mask: radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 6px), #000 100%); opacity: 0.35; filter: blur(3px); }
 
@@ -397,11 +403,19 @@ body.js-on .slot { will-change: transform, opacity; }
 .solid {
   position: relative; z-index: 3;
   background: var(--solid);
+  transition: background var(--dur-2) var(--ease);
   padding: clamp(var(--s5), 14vh, 7rem) clamp(1.5rem, 6vw, 7rem);
 }
 .solid.seam { margin-top: 24vh; margin-bottom: 24vh; }
 .solid.seam::before, .solid.seam::after {
   content: ""; position: absolute; left: 0; right: 0; height: 24vh; pointer-events: none;
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  @media (min-width: 721px) {
+    .solid { background: rgba(5,5,5,0.72); -webkit-backdrop-filter: blur(28px) saturate(1.2); backdrop-filter: blur(28px) saturate(1.2); }
+    .solid.seam::before { background: linear-gradient(to bottom, rgba(5,5,5,0), rgba(5,5,5,0.72)); }
+    .solid.seam::after { background: linear-gradient(to top, rgba(5,5,5,0), rgba(5,5,5,0.72)); }
+  }
 }
 .solid.seam::before { top: -24vh; background: linear-gradient(to bottom, rgba(5,5,5,0), var(--solid)); }
 .solid.seam::after { bottom: -24vh; background: linear-gradient(to top, rgba(5,5,5,0), var(--solid)); }
@@ -506,6 +520,7 @@ body.js-on .pin { will-change: auto; }
   .slots { grid-template-columns: 1fr; gap: var(--s1); margin-top: var(--s2); perspective: none; }
   .slot { transform: none; }
   .cursorglow { display: none; }
+  .fog { display: none; }
   #hero .copy { transform: none; transition: none; }
   .slot p { display: none; }               /* mobil nur Index + Titel, Text folgt auf der Case-Seite */
   .focus-list { margin-top: var(--s2); }
@@ -576,7 +591,7 @@ body.js-on .pin { will-change: auto; }
   .display .ch { transform: none !important; opacity: 1 !important; }
   .slot { transform: none !important; opacity: 1 !important; --t: 1 !important; }
   .scene-line .ch { opacity: 1 !important; text-shadow: none !important; color: var(--paper) !important; }
-  #sparks, .cursorglow { display: none !important; }
+  #sparks, .cursorglow, .fog { display: none !important; }
   .screen .frame, .founder, .portrait span { transform: none !important; opacity: 1 !important; }
   .portrait, .founder h3, .founder .lab, .founder .line, .founder .textlink, .screen figcaption { opacity: 1 !important; -webkit-mask-position: 100% 0 !important; mask-position: 100% 0 !important; }
   .pulse, .thread::after { animation: none !important; opacity: 0 !important; }
