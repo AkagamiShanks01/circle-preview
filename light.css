@@ -1,6 +1,6 @@
 /* THE CIRCLE — Light-Variante (weiss + rot), 2026-09-08.
  * Nur Farb-Overrides ueber style.css. Struktur, Typo, Film und jede Bewegung bleiben identisch.
- * Der Film ist dasselbe Material, invertiert und im Farbton zurueckgedreht, damit Rot Rot bleibt.
+ * Der Film ist dasselbe Material als Weiss-Rot-Duplex: Negativ in Grau, dann Gamma-Kurve auf Rot (Neon rot, Grund weiss).
  */
 :root {
   --red: #d10500;
@@ -21,7 +21,7 @@ html { scrollbar-color: rgba(11, 11, 11, 0.22) transparent; }
 /* ── Film: gleiche Frames, invertiert + Hue zurueck ── */
 #film, #filmgl {
   background-color: #050505;
-  filter: invert(1) grayscale(1) contrast(1.12) url(#duplex);
+  filter: invert(1) grayscale(1) contrast(1.28) url(#duplex);
 }
 #film { background-image: url("seq10/f0001.webp"); }
 
