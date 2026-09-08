@@ -1,6 +1,6 @@
 /* THE CIRCLE — Light-Variante (weiss + rot), 2026-09-08.
  * Nur Farb-Overrides ueber style.css. Struktur, Typo, Film und jede Bewegung bleiben identisch.
- * Der Film ist dasselbe Material als Weiss-Rot-Duplex: Negativ in Grau, dann Gamma-Kurve auf Rot (Neon rot, Grund weiss).
+ * Der Film ist dasselbe Material: Negativ in Grau, Statue und Steine grau, Rot nur am Neon als Akzent.
  */
 :root {
   --red: #d10500;
@@ -21,7 +21,7 @@ html { scrollbar-color: rgba(11, 11, 11, 0.22) transparent; }
 /* ── Film: gleiche Frames, invertiert + Hue zurueck ── */
 #film, #filmgl {
   background-color: #050505;
-  filter: invert(1) grayscale(1) contrast(1.28) url(#duplex);
+  filter: invert(1) grayscale(1) contrast(1.1) url(#duplex);
 }
 #film { background-image: url("seq10/f0001.webp"); }
 
@@ -78,8 +78,8 @@ html { scrollbar-color: rgba(11, 11, 11, 0.22) transparent; }
 /* ── Fokus-Liste, Proof-Slots ── */
 .focus-list p { border-bottom-color: rgba(11,11,11, calc(0.12 * var(--t))); }
 .slot { border-color: rgba(11,11,11, calc(0.12 * var(--t))); background: rgba(255,255,255, calc(0.45 * var(--t))); }
-.slot::before { filter: invert(1) grayscale(1) url(#duplex) drop-shadow(0 0 16px rgba(209,5,0,0.35)); }
-.focus-list p::before { filter: invert(1) grayscale(1) url(#duplex) drop-shadow(0 0 14px rgba(209,5,0,0.3)); }
+.slot::before { filter: invert(1) grayscale(1) url(#duplex) drop-shadow(0 0 16px rgba(11,11,11,0.18)); }
+.focus-list p::before { filter: invert(1) grayscale(1) url(#duplex) drop-shadow(0 0 14px rgba(11,11,11,0.16)); }
 .focus-list p::after {
   background: radial-gradient(circle, rgba(209,5,0,0.95) 0%, rgba(209,5,0,0.35) 40%, rgba(209,5,0,0) 70%);
 }

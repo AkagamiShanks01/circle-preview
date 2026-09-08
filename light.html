@@ -20,15 +20,15 @@
   <link rel="preload" as="image" href="seq10/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
   <link rel="preload" as="image" href="seqp10/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
   <link rel="stylesheet" href="style.css?v=38" />
-  <link rel="stylesheet" href="light.css?v=3" />
+  <link rel="stylesheet" href="light.css?v=4" />
 </head>
 <body>
-  <!-- Light-Duplex: Negativ in Grau, dann Tonwerte auf Weiss-Rot abgebildet (Schwarz wird Rot, Weiss bleibt Weiss) -->
+  <!-- Light-Duplex: Negativ in Grau; nur die hellsten Stellen des Films (das Neon) werden rot, alles andere bleibt neutral grau -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="duplex" color-interpolation-filters="sRGB">
     <feComponentTransfer>
-      <feFuncR type="gamma" exponent="0.9" amplitude="0.22" offset="0.78"/>
-      <feFuncG type="gamma" exponent="2.9" amplitude="1" offset="0.02"/>
-      <feFuncB type="gamma" exponent="3.2" amplitude="1" offset="0"/>
+      <feFuncR type="table" tableValues="0.86 0.58 0.36 0.40 0.50 0.60 0.70 0.79 0.87 0.94 1"/>
+      <feFuncG type="table" tableValues="0.03 0.09 0.19 0.30 0.41 0.52 0.62 0.72 0.82 0.91 1"/>
+      <feFuncB type="table" tableValues="0.02 0.08 0.18 0.29 0.40 0.51 0.62 0.72 0.82 0.91 1"/>
     </feComponentTransfer>
   </filter></svg>
   <canvas id="film" aria-hidden="true"></canvas>
