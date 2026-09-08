@@ -532,32 +532,25 @@ body.js-on .pin { will-change: auto; }
   #forging { height: 160vh; }
   #hand { height: 100vh; }
   #treehold { height: 320vh; }
-  /* mobil: die Knoten als Liste unten links (Portrait-Crop zeigt nur zwei Aeste) */
-  .nodes { position: absolute; inset: auto 1.2rem 9vh 1.2rem; display: flex; flex-direction: column; gap: 1.1rem; }
-  /* lokaler Lese-Scrim hinter der Liste (die Buste darunter ist hell) */
-  .nodes::before { content: ""; position: absolute; left: -1.2rem; right: -1.2rem; top: -22vh; bottom: -9vh; z-index: -1; pointer-events: none;
-    background: linear-gradient(to bottom, rgba(5,5,5,0) 0%, rgba(5,5,5,0.55) 30%, rgba(5,5,5,0.82) 60%, rgba(5,5,5,0.9) 100%); }
-  .node { position: static !important; transform: none; flex-direction: row; align-items: baseline; gap: 0.8rem; padding: 0 0 0 1.6rem; }
-  .node { padding: 0 0 0 1.6rem; flex-wrap: wrap; row-gap: 0.25rem; translate: -0.8rem 0; }
+  /* mobil: Knoten auf dem Portrait-Frame (1080x1920 Cover), nicht als Liste */
+  .nodes { position: absolute; inset: 0; display: block; }
+  .nodes::before, .nodes::after { content: none; display: none; }
+  .node {
+    position: absolute; transform: translate(-50%, -100%);
+    flex-direction: column; align-items: center; gap: 0.2rem;
+    padding: 0.45rem 0.4rem 2.2rem; min-width: 44px; min-height: 44px;
+    flex-wrap: nowrap; translate: 0 0.6rem;
+  }
   .nodes.live .node { translate: 0 0; }
   .node:active { scale: 1.03; }
   .stage { display: none; }
-  /* Linie durch die Ringe + Zuendpuls, der einmal von oben nach unten laeuft */
-  .nodes::after { content: ""; position: absolute; left: -0.2rem; top: 0.4rem; bottom: 0.4rem; width: 1px; margin-left: 0.25rem; background: linear-gradient(to bottom, rgba(255,42,35,0), rgba(255,42,35,0.7) 12%, rgba(255,42,35,0.7) 88%, rgba(255,42,35,0)); opacity: 0; transition: opacity var(--dur-2) var(--ease); }
-  .nodes.live::after { opacity: 1; }
-  .nodes .mpulse { position: absolute; left: -0.2rem; top: 0; width: 1px; height: 3rem; margin-left: 0.25rem; opacity: 0; border-radius: 1px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1) 50%, rgba(255,255,255,0)); box-shadow: 0 0 10px rgba(255,120,110,0.9); }
-  .nodes.live .mpulse { animation: mtravel 1.3s cubic-bezier(0.3, 0, 0.2, 1) both; }
-  @keyframes mtravel { 0% { transform: translateY(-3rem); opacity: 0; } 12% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(100%); opacity: 0; } }
-  .node b, .node small { -webkit-mask-image: url("media/erode-mask.png"); mask-image: url("media/erode-mask.png"); -webkit-mask-size: 300% 100%; mask-size: 300% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-    -webkit-mask-position: 0 0; mask-position: 0 0; transition: -webkit-mask-position 0.9s var(--ease), mask-position 0.9s var(--ease); transition-delay: calc(var(--delay, 0s) + 0.25s); }
-  .node small { transition-delay: calc(var(--delay, 0s) + 0.45s); }
-  .nodes.live .node b, .nodes.live .node small { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
-  .node b { text-shadow: none; }
-  /* Beschreibung immer in eigener Zeile (max-width vom Desktop-Hover aufheben) */
-  .node small { max-height: none; max-width: none; opacity: 1; margin: 0; flex-basis: 100%; text-align: left; font-size: var(--t2); line-height: 1.55; letter-spacing: 0; text-transform: none; color: var(--mute); }
-  .node i { display: none; }
-  .node::after { left: -0.2rem; bottom: auto; top: 0.15em; transform: none; }
+  .nodes .mpulse { display: none; }
+  .node b, .node small { -webkit-mask-image: none; mask-image: none; }
+  .node b { letter-spacing: 0.08em; font-size: 0.58rem; text-shadow: 0 1px 12px rgba(5, 5, 5, 0.9); }
+  .node span { letter-spacing: 0.16em; }
+  .node small { display: none; }
+  .node i { display: block; }
+  .node::after { left: auto; bottom: -0.1rem; top: auto; transform: none; }
   .thread { left: 1.2rem; }
   .focus-list p:not(.on) .d { display: none; }   /* mobil: nur der aktive Sektor zeigt seine Zeile */
   .kicker::after { display: none; }

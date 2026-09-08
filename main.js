@@ -119,9 +119,27 @@
   const mmEl = document.getElementById("masterminds");
   // Knoten liegen im 16:9-Frame (normiert); Cover-Geometrie des Canvas auf den Viewport umrechnen
   const stageEl = document.getElementById("stage");
+  // Portrait-Anker: normiert 0..1 im 1080x1920-seqp10-Frame (Cover wie drawImageCover am Halt, heroVis=0)
+  const NODE_PORTRAIT = {
+    "#team": { x: 0.16, y: 0.87 },
+    "#edu": { x: 0.20, y: 0.72 },
+    "#intelligence": { x: 0.78, y: 0.73 },
+    "#masterminds": { x: 0.80, y: 0.90 },
+  };
   function placeNodes() {
-    if (!nodeEls.length || innerWidth <= 720) return;
+    if (!nodeEls.length) return;
     const vw = innerWidth, vh = innerHeight;
+    if (vw <= 720) {
+      const s = Math.max(vw / 1080, vh / 1920);
+      const dx = (vw - 1080 * s) / 2, dy = (vh - 1920 * s) / 2;
+      for (const n of nodeEls) {
+        const p = NODE_PORTRAIT[n.getAttribute("href")];
+        if (!p) continue;
+        n.style.left = `${(dx + p.x * 1080 * s).toFixed(1)}px`;
+        n.style.top = `${(dy + p.y * 1920 * s).toFixed(1)}px`;
+      }
+      return;
+    }
     const s = Math.max(vw / 1920, vh / 1080);
     const dx = (vw - 1920 * s) / 2, dy = (vh - 1080 * s) / 2;
     if (stageEl) stageEl.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${s.toFixed(4)})`;
