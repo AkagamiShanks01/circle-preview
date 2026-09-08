@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>THE CIRCLE</title>
+  <meta name="description" content="Building people and companies that compound. The Circle takes stakes in businesses and scales them with its own teams, software and processes. Across industries." />
+  <meta name="theme-color" content="#ffffff" />
+  <meta property="og:title" content="THE CIRCLE" />
+  <meta property="og:description" content="Building people and companies that compound. The Circle takes stakes in businesses and scales them with its own teams, software and processes. Across industries." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://akagamishanks01.github.io/circle-preview/" />
+  <meta property="og:image" content="https://akagamishanks01.github.io/circle-preview/og.jpg?v=31" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='15' fill='none' stroke='%23e10600' stroke-width='4'/%3E%3C/svg%3E" />
+  <link rel="preload" as="image" href="seq10/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
+  <link rel="preload" as="image" href="seqp10/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
+  <link rel="stylesheet" href="style.css?v=38" />
+  <link rel="stylesheet" href="light.css?v=1" />
+</head>
+<body>
+  <canvas id="film" aria-hidden="true"></canvas>
+  <!-- Funken-Ebene (Forging bis Baum): leichte 2D-Partikel, Intensitaet folgt der Scrollgeschwindigkeit -->
+  <canvas id="sparks" aria-hidden="true"></canvas>
+  <div class="cursorglow" id="cursorglow" aria-hidden="true"></div>
+  <!-- (E5) Nebel vor dem Text: zwei Ebenen, driften mit Scroll und Maus -->
+  <div class="fog" id="fog1" aria-hidden="true"></div>
+  <div class="fog fog2" id="fog2" aria-hidden="true"></div>
+  <div class="shade" aria-hidden="true"></div>
+  <div class="grain" id="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="lockup" href="/">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+      <span>THE&nbsp;CIRCLE</span>
+    </a>
+    <a class="nav-contact" href="mailto:n.achiniani@copy-close.com">CONTACT</a>
+  </header>
+  <!-- Frame-Counter: nur Debug (?debug=1), zum Kalibrieren der Film-Zuordnung -->
+  <div class="marginalia" id="marginalia" aria-hidden="true" hidden><span id="fcount">F 0001 / 1225</span></div>
+
+  <div class="progress" aria-hidden="true"><div class="progress-bar" id="pbar"></div></div>
+  <!-- Der Faden: verbindet Baum-Knoten und Ast-Sektionen (JS steuert Sichtbarkeit und Laenge) -->
+  <div class="thread" id="thread" aria-hidden="true"></div>
+
+  <main id="scroll-root">
+
+    <!-- I · HERO — Nicolas 04.09.: „Building people and companies that compound." · Film: leerer Ring -->
+    <section class="scene" id="hero">
+      <div class="pin">
+        <div class="copy">
+          <h1 class="display reveal">
+            <span>Building people</span>
+            <span>and companies</span>
+            <span>that <em class="red">compound</em>.</span>
+          </h1>
+          <p class="sub">The Circle takes stakes in businesses and scales them with its own teams, software and processes. Built in sales. Run on one system. Held over&nbsp;time.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- II · FOCUS — Miro „Our investment focus…" (fuenf Sektoren, unser Ton) · Film: Ring glüht -->
+    <section class="scene" id="focus">
+      <div class="pin">
+        <div class="copy pillar wide">
+          <p class="kicker" data-n="01">FOCUS</p>
+          <h2 class="reveal"><span>Five sectors.</span><span>One way of&nbsp;building.</span></h2>
+          <p class="body-copy">We take stakes where our system is the advantage: a product that already works and a growth engine that does not yet&nbsp;exist.</p>
+          <div class="focus-list" data-focus>
+            <p style="--shard:url(media/shard-1.webp)"><b>AI</b><span class="d">Systems and automation that change how a company operates and&nbsp;decides.</span></p>
+            <p style="--shard:url(media/shard-2.webp)"><b>Education</b><span class="d">Learning models that scale access, outcomes and careers.</span></p>
+            <p style="--shard:url(media/shard-3.webp)"><b>Real Estate</b><span class="d">Technology-enabled assets, positioned for long-term&nbsp;value.</span></p>
+            <p style="--shard:url(media/shard-4.webp)"><b>SaaS</b><span class="d">Recurring-revenue software around workflows a company cannot&nbsp;skip.</span></p>
+            <p style="--shard:url(media/shard-5.webp)"><b>Entertainment</b><span class="d">Media, gaming and consumer platforms built on attention and&nbsp;culture.</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- III · PROOF — Miro „Brands, companies and cases listed 1. 2. 3." · Film: Formung beginnt -->
+    <section class="scene" id="proof">
+      <div class="pin">
+        <div class="copy pillar wide">
+          <p class="kicker" data-n="02">PROOF</p>
+          <h2 class="reveal"><span>Companies</span><span>and&nbsp;cases.</span></h2>
+          <p class="body-copy">A name appears here once its ownership is documented and every partner wants it public. Until then, the work stays&nbsp;private.</p>
+          <!-- DRAFT: anonymisierte Cases aus dem Kontext, keine Namen (D7). Founder liefern die echten drei. -->
+          <div class="slots" data-stagger>
+            <article class="slot" style="--shard:url(media/shard-1.webp)">
+              <span class="idx">01 · EDUCATION</span>
+              <h3>From a first offer to a full sales&nbsp;floor.</h3>
+              <p>An education company taken from launch to its own media buying, setting and closing teams, run on the Circle's&nbsp;software.</p>
+            </article>
+            <article class="slot" style="--shard:url(media/shard-3.webp)">
+              <span class="idx">02 · REAL ESTATE</span>
+              <h3>Development and investment at&nbsp;scale.</h3>
+              <p>Real estate projects in the hundreds of millions, developed and financed by a Circle&nbsp;founder.</p>
+            </article>
+            <article class="slot" style="--shard:url(media/shard-4.webp)">
+              <span class="idx">03 · SAAS</span>
+              <h3>Software built inside, used&nbsp;everywhere.</h3>
+              <p>CirclOS for performance marketing and Arena for sales, built in-house and running in every company we&nbsp;hold.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILM-ONLY · die Statue formt sich und vollendet sich (Segmente 3/4/5), keine Copy -->
+    <section class="scene film-only" id="forging" aria-hidden="true"><div class="pin"></div></section>
+
+    <!-- IV · BRIDGE — Miro oranger Hinweis · Film: vollendete Büste -->
+    <section class="scene" id="bridge">
+      <div class="pin center">
+        <div class="copy copy-center">
+          <h2 class="scene-line reveal"><span>Everything below is an effect</span><span>of how we build and&nbsp;scale.</span></h2>
+          <p class="body-copy"><em>Scaling and giving.</em></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILM-ONLY · die Hand streckt sich aus (Segment A) -->
+    <section class="scene film-only" id="hand" aria-hidden="true"><div class="pin"></div></section>
+
+    <!-- TREE · die Pfade wachsen zum Baum (Segment B); die vier Knoten tragen Alex' Struktur -->
+    <section class="scene" id="treehold">
+      <div class="pin nodes-pin">
+        <div class="nodes" id="nodes" aria-label="Structure">
+          <a class="node" href="#team" data-x="0.118" data-y="0.938"><i></i><span>03</span><b>Team</b><small>Circle Elites, Circle Performance, Media Team. The people who do the&nbsp;work.</small></a>
+          <a class="node" href="#edu" data-x="0.208" data-y="0.814"><i></i><span>04</span><b>Edu &amp; Uni</b><small>From zero to operator, taught inside live companies. A campus in the&nbsp;making.</small></a>
+          <a class="node" href="#intelligence" data-x="0.685" data-y="0.800"><i></i><span>05</span><b>Intelligence</b><small>CirclOS, Arena, Education. Built in-house, never&nbsp;sold.</small></a>
+          <a class="node" href="#masterminds" data-x="0.765" data-y="0.910"><i></i><span>06</span><b>Masterminds</b><small>A few times a year, ten seats, in&nbsp;private.</small></a>
+          <!-- Zuendimpulse: laufen vom Stamm ueber den Ast zum Knoten (Frame-Koordinaten 1920x1080, JS legt die Buehne per Cover-Geometrie) -->
+          <i class="mpulse" aria-hidden="true"></i>
+          <div class="stage" id="stage" aria-hidden="true">
+            <i class="pulse" data-for="team" style="offset-path: path('M 745 896 Q 480 905 226 1013')"></i>
+            <i class="pulse" data-for="edu" style="offset-path: path('M 745 896 Q 560 885 400 879')"></i>
+            <i class="pulse" data-for="intelligence" style="offset-path: path('M 745 896 Q 1050 935 1315 864')"></i>
+            <i class="pulse" data-for="masterminds" style="offset-path: path('M 745 896 Q 1150 1000 1469 983')"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- V · TEAM — Miro Ast TEAM · Film: Pull-back, der Baum weicht zurueck (Segment C) -->
+    <section class="scene branch" id="team">
+      <div class="pin">
+        <div class="copy pillar">
+          <p class="kicker" data-n="03"><span class="ring"></span>TEAM</p>
+          <h2 class="reveal"><span>Teams define the standards</span><span>a company lives&nbsp;by.</span></h2>
+          <p class="team-line"><span>CIRCLE&nbsp;ELITES</span><i>·</i><span>CIRCLE&nbsp;PERFORMANCE</span><i>·</i><span>MEDIA&nbsp;TEAM</span></p>
+          <p class="body-copy">Every phase of growth demands a team. We embed ours where it matters most: paid demand, organic media and the sales floor. Filtered, trained and sharpened by the people who run the&nbsp;companies.</p>
+          <p class="body-copy">Circle Elites is the door in. Performance and Media are where the work gets&nbsp;done.</p>
+          <p class="linkline"><a class="textlink" href="https://www.instagram.com/circleelites" rel="noopener">Circle Elites on Instagram</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VI · EDU & UNI — Miro Ast EDU & UNI + Knoten Uni · Film: Pull-back, Ende -->
+    <section class="scene branch" id="edu">
+      <div class="pin">
+        <div class="copy pillar">
+          <p class="kicker" data-n="04"><span class="ring"></span>EDU &amp; UNI</p>
+          <h2 class="reveal"><span>The CEO is not your boss.</span><span>He is your&nbsp;mentor.</span></h2>
+          <!-- DRAFT: Alex' Stichworte ausformuliert; Universitäts-Story aus „Story about the vision of building physical universities" -->
+          <p class="body-copy">We take people from zero and make them operators: setters, closers, media buyers, taught inside live companies by the people who run them. Skills first, then the lessons that outlast a&nbsp;job.</p>
+          <p class="body-copy">The long-term vision is a physical Circle university: a campus where business is taught by operators, and every graduate has already worked inside a company we&nbsp;scale.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VII · INTELLIGENCE — Miro Ast INTELLIGENCE · statisch schwarz mit Verläufen -->
+    <section class="solid seam branch" id="intelligence">
+      <div class="solid-inner">
+        <p class="kicker" data-n="05"><span class="ring"></span>INTELLIGENCE</p>
+        <h2>Every stage of scale demands&nbsp;intelligence.</h2>
+        <p class="body-copy">We turn operating experience into systems. CirclOS runs performance marketing, Arena runs sales, Education carries what the teams need to know. Built in-house, running in every company we hold, never&nbsp;sold.</p>
+        <!-- Screens: Platzhalter-Rahmen bis die Produkt-Screens in Auflösung vorliegen -->
+        <div class="screens">
+          <figure class="screen"><div class="frame"><span>CIRCLOS</span></div><figcaption>The operating system for performance marketing. Every click, every lead, every account in one&nbsp;view.</figcaption></figure>
+          <figure class="screen"><div class="frame"><span>ARENA</span></div><figcaption>The sales dashboard. See the whole picture, lead with&nbsp;insight.</figcaption></figure>
+          <figure class="screen"><div class="frame"><span>EDUCATION</span></div><figcaption>The learning layer that turns knowledge into onboarding, training and&nbsp;standards.</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIII · MASTERMINDS — Miro Knoten MMs · Film: Büste weicht zurück -->
+    <section class="scene branch" id="masterminds">
+      <div class="pin">
+        <div class="copy pillar">
+          <p class="kicker" data-n="06"><span class="ring"></span>MASTERMINDS</p>
+          <h2 class="reveal"><span>Occasionally,</span><span>the room&nbsp;opens.</span></h2>
+          <!-- DRAFT-Rahmen; Social Proof (Zitat/Foto) liefern die Founder -->
+          <p class="body-copy">A few times a year the three founders take a small room through how we build: demand, psychology, the close, the team. Ten seats. In private. Announced on the founders'&nbsp;channels.</p>
+          <p class="linkline"><a class="textlink" href="mailto:n.achiniani@copy-close.com?subject=Masterminds">Ask about the next room</a></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- IX · FOUNDERS — Miro Instagram-Profile · statisch schwarz -->
+    <section class="solid seam founders-block" id="founders">
+      <div class="solid-inner">
+        <p class="kicker" data-n="07">FOUNDERS</p>
+        <h2>Three founders. One&nbsp;circle.</h2>
+        <div class="founders">
+          <div class="founder">
+            <div class="portrait" aria-hidden="true"><span>N</span></div>
+            <h3>Nicolas</h3>
+            <p class="lab">Marketing, Ads &amp; AI Processes</p>
+            <p class="line">Builds the demand engine behind the group: performance marketing, funnels and the AI processes that run&nbsp;them.</p>
+            <a class="textlink" href="https://www.instagram.com/nls" rel="noopener">@nls</a>
+          </div>
+          <div class="founder">
+            <div class="portrait" aria-hidden="true"><span>A</span></div>
+            <h3>Assad</h3>
+            <p class="lab">Mindset, Leadership &amp; Culture</p>
+            <!-- Bio-Zeile aus seinem Instagram; Umfang mit Assad abstimmen -->
+            <p class="line">Sets the standard a team is held to. Mentor, real estate developer and&nbsp;investor.</p>
+            <a class="textlink" href="https://www.instagram.com/therealassad" rel="noopener">@therealassad</a>
+          </div>
+          <div class="founder">
+            <div class="portrait" aria-hidden="true"><span>A</span></div>
+            <h3>Alex K.</h3>
+            <p class="lab">High-Ticket Sales &amp; Team Leadership</p>
+            <p class="line">Runs the sales floor and the people on it: opening, setting, closing, and the leaders who carry&nbsp;it.</p>
+            <a class="textlink" href="https://www.instagram.com/aavo" rel="noopener">@aavo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- X · CONTACT + FOOTER — gated · Film: Ende -->
+    <section class="scene" id="close">
+      <div class="pin">
+        <div class="copy pillar" id="contact">
+          <!-- (10) Der Ring aus dem Hero schliesst sich als Rahmen um den Textblock (JS setzt --ring 0..1) -->
+          <div class="ring-frame" aria-hidden="true"></div>
+          <p class="kicker" data-n="08">CONTACT</p>
+          <h2 class="reveal"><span>For serious founders,</span><span>investors and partners&nbsp;only.</span></h2>
+          <p class="body-copy">If you came for a course, this is the wrong place.
+            If you run something real and want to talk,
+            <a class="textlink inline" href="mailto:n.achiniani@copy-close.com">write to us</a>.</p>
+          <footer class="footer">
+            <span>THE CIRCLE · Venture company</span>
+            <a href="mailto:n.achiniani@copy-close.com?subject=Legal">Legal</a>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="main.js?v=38"></script>
+</body>
+</html>
