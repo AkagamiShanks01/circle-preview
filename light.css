@@ -118,3 +118,11 @@ html { scrollbar-color: rgba(11, 11, 11, 0.22) transparent; }
 
 /* ── Poster ohne JS ── */
 @media (orientation: portrait) { #film { background-image: url("seqp10/f0001.webp"); } }
+
+/* ── Akzentstudien (nur Review, light.html?accent=garnet|bronze; Default Rot) ── */
+html[data-accent="garnet"] { --red: #8a1420; --red-soft: #a3202c; --glow: #8a1420; }
+html[data-accent="bronze"] { --red: #b07a2a; --red-soft: #c48f3a; --glow: #b07a2a; }
+html[data-accent="garnet"] #film, html[data-accent="garnet"] #filmgl, html[data-accent="garnet"] #sparks,
+html[data-accent="garnet"] .slot::before, html[data-accent="garnet"] .focus-list p::before { filter: invert(1) grayscale(1) url(#duplex-garnet); }
+html[data-accent="bronze"] #film, html[data-accent="bronze"] #filmgl, html[data-accent="bronze"] #sparks,
+html[data-accent="bronze"] .slot::before, html[data-accent="bronze"] .focus-list p::before { filter: invert(1) grayscale(1) url(#duplex-bronze); }

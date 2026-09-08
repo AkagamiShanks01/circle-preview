@@ -20,17 +20,35 @@
   <link rel="preload" as="image" href="seq10/f0001.webp" fetchpriority="high" media="(orientation: landscape)" />
   <link rel="preload" as="image" href="seqp10/f0001.webp" fetchpriority="high" media="(orientation: portrait)" />
   <link rel="stylesheet" href="style.css?v=38" />
-  <link rel="stylesheet" href="light.css?v=5" />
+  <link rel="stylesheet" href="light.css?v=6" />
+  <script>(function(){var a=new URLSearchParams(location.search).get("accent");if(a==="garnet"||a==="bronze"){document.documentElement.dataset.accent=a;}})();</script>
 </head>
 <body>
-  <!-- Light-Duplex: Negativ in Grau; nur die hellsten Stellen des Films (das Neon) werden rot, alles andere bleibt neutral grau -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="duplex" color-interpolation-filters="sRGB">
+  <!-- Light-Material v6 (Fable 2026-09-08): V-Kurve ueber invert(1) grayscale(1). Schwarz wird Weiss, Statue und Steine behalten ihre Original-Tonalitaet (echtes Grau),
+       Nebel wird Kohle, nur Neonkern und Glow tragen den Akzent (Gewicht 1 -> 0 zwischen L' 0 und 0.55). 41 Stuetzstellen je Kanal, Quelle foreman/scratch/frames/curves2.py -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="duplex" color-interpolation-filters="sRGB"><!-- Akzent A: Rot #d10500 (gebunden) -->
     <feComponentTransfer>
-      <feFuncR type="table" tableValues="0.86 0.74 0.58 0.40 0.26 0.15 0.09 0.06 0.05 0.05 0.07 0.10 0.15 0.21 0.29 0.38 0.49 0.61 0.74 0.88 1"/>
-      <feFuncG type="table" tableValues="0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.01 0.02 0.03 0.05 0.08 0.12 0.18 0.26 0.35 0.46 0.58 0.71 0.86 1"/>
-      <feFuncB type="table" tableValues="0.00 0.00 0.00 0.00 0.00 0.00 0.01 0.01 0.02 0.03 0.05 0.08 0.12 0.18 0.26 0.35 0.46 0.58 0.71 0.86 1"/>
+      <feFuncR type="table" tableValues="0.820 0.821 0.821 0.820 0.818 0.814 0.807 0.799 0.790 0.779 0.766 0.748 0.728 0.715 0.703 0.690 0.677 0.664 0.651 0.638 0.626 0.606 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+      <feFuncG type="table" tableValues="0.020 0.035 0.048 0.060 0.071 0.085 0.112 0.138 0.162 0.185 0.206 0.235 0.262 0.296 0.329 0.363 0.397 0.431 0.465 0.498 0.532 0.559 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+      <feFuncB type="table" tableValues="0.000 0.015 0.029 0.041 0.053 0.067 0.094 0.121 0.146 0.170 0.192 0.222 0.250 0.285 0.320 0.355 0.390 0.425 0.460 0.495 0.530 0.558 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
     </feComponentTransfer>
-  </filter></svg>
+  </filter>
+  <filter id="duplex-garnet" color-interpolation-filters="sRGB"><!-- Akzent B: Garnet #8a1420 (Studie) -->
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues="0.540 0.546 0.551 0.554 0.557 0.559 0.564 0.568 0.570 0.571 0.570 0.569 0.565 0.569 0.572 0.576 0.579 0.583 0.586 0.590 0.593 0.589 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+      <feFuncG type="table" tableValues="0.080 0.094 0.106 0.117 0.127 0.140 0.164 0.187 0.209 0.229 0.248 0.273 0.297 0.327 0.357 0.388 0.418 0.448 0.479 0.509 0.539 0.563 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+      <feFuncB type="table" tableValues="0.130 0.143 0.154 0.165 0.174 0.185 0.207 0.229 0.248 0.267 0.283 0.306 0.326 0.353 0.381 0.408 0.435 0.463 0.490 0.518 0.545 0.566 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+    </feComponentTransfer>
+  </filter>
+  <filter id="duplex-bronze" color-interpolation-filters="sRGB"><!-- Akzent C: Bronze #b07a2a (Studie) -->
+    <feComponentTransfer>
+      <feFuncR type="table" tableValues="0.690 0.693 0.696 0.697 0.697 0.696 0.694 0.692 0.688 0.682 0.675 0.665 0.652 0.647 0.642 0.637 0.631 0.626 0.621 0.616 0.610 0.598 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+      <feFuncG type="table" tableValues="0.480 0.487 0.493 0.497 0.501 0.504 0.511 0.518 0.523 0.526 0.528 0.530 0.530 0.537 0.544 0.551 0.558 0.565 0.572 0.579 0.586 0.586 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+      <feFuncB type="table" tableValues="0.160 0.172 0.183 0.193 0.202 0.213 0.233 0.253 0.272 0.289 0.304 0.325 0.343 0.369 0.395 0.420 0.446 0.472 0.497 0.523 0.549 0.567 0.585 0.577 0.570 0.553 0.537 0.520 0.503 0.487 0.470 0.447 0.424 0.401 0.378 0.355 0.323 0.290 0.330 0.610 1.000"/>
+    </feComponentTransfer>
+  </filter>
+  </svg>
   <canvas id="film" aria-hidden="true"></canvas>
   <!-- Funken-Ebene (Forging bis Baum): leichte 2D-Partikel, Intensitaet folgt der Scrollgeschwindigkeit -->
   <canvas id="sparks" aria-hidden="true"></canvas>
